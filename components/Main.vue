@@ -18,67 +18,6 @@
       </div>
     </div>
 
-    <!-- <div
-      class="absolute top-[calc(100%/12*0)] h-[calc(100%/12*1)] w-full bg-red-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">1</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*1)] h-[calc(100%/12*1)] w-full bg-green-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">2</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*2)] h-[calc(100%/12*1)] w-full bg-blue-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">3</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*3)] h-[calc(100%/12*1)] w-full bg-yellow-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">4</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*4)] h-[calc(100%/12*1)] w-full bg-red-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">5</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*5)] h-[calc(100%/12*1)] w-full bg-green-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">6</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*6)] h-[calc(100%/12*1)] w-full bg-blue-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">7</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*7)] h-[calc(100%/12*1)] w-full bg-yellow-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">8</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*8)] h-[calc(100%/12*1)] w-full bg-red-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">9</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*9)] h-[calc(100%/12*1)] w-full bg-green-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">10</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*10)] h-[calc(100%/12*1)] w-full bg-blue-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">11</p>
-    </div>
-    <div
-      class="absolute top-[calc(100%/12*11)] h-[calc(100%/12*1)] w-full bg-yellow-200/50 pointer-events-none"
-    >
-      <p class="text-2xl font-black text-white">12</p>
-    </div> -->
-
     <div
       class="absolute flex top-[calc(100%/12*10)] h-[calc(100%/12*1)] w-full justify-center pointer-events-none"
     >
@@ -171,7 +110,7 @@
           class="w-10/12 float-right p-1"
           id="input-gameuid"
           placeholder="請輸入《絕地求生M》UID"
-          minlength="6"
+          minlength="5"
           maxlength="12"
           pattern="[0-9]*"
           type="text"
@@ -396,6 +335,7 @@ export default {
       luckLvlLabel: "",
       poemData: [null, null, null, null],
       luckTypeLabel: ["整體", "財富", "健康", "感情"],
+      gameUidFieldLength: 0,
       gameUidFieldVerified: false,
       userNameFieldVerified: false,
     };
@@ -550,7 +490,8 @@ export default {
         e.target.value = str.slice(0, -1);
         return;
       }
-      if (e.target.value.length >= 6 && e.target.value.length <= 12) {
+      this.gameUidFieldLength = e.target.value.length;
+      if (e.target.value.length >= 5 && e.target.value.length <= 12) {
         this.gameUidFieldVerified = true;
       } else {
         this.gameUidFieldVerified = false;
@@ -598,8 +539,9 @@ export default {
         this.unityInstance.SendMessage("日", "OnReceiveDialogInputValue", val);
     },
     onClickSubmitOnGameUIDNotPass(e) {
-      if (this.gameUidFieldVerified == false) {
-        alert("遊戲UID必須介於6~12位數字之間");
+      const field = document.getElementById("input-gameuid");
+      if (field.value.length > 0 && this.gameUidFieldVerified == false) {
+        alert("遊戲UID必須介於5~12位數字之間");
         return;
       }
       if (this.userNameFieldVerified == false) {
