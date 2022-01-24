@@ -10,6 +10,7 @@
       id="unity-canvas"
       :width="respWidth + 'px'"
       :height="respHeight + 'px'"
+      class="w-full"
     ></canvas>
     <div id="unity-loading-bar">
       <div id="unity-logo"></div>
@@ -17,6 +18,8 @@
         <div id="unity-progress-bar-full"></div>
       </div>
     </div>
+
+    <!-- <Checker /> -->
 
     <div
       class="absolute flex top-[calc(100%/12*10)] h-[calc(100%/12*1)] w-full justify-center pointer-events-none"
@@ -29,7 +32,7 @@
       ></button>
     </div>
 
-    <no-ssr
+    <!-- <client-only
       ><flickity
         ref="flickity"
         :options="flickityOpts"
@@ -90,8 +93,8 @@
             </p>
           </div>
         </div>
-      </flickity></no-ssr
-    >
+      </flickity></client-only
+    > -->
     <div
       class="absolute top-[calc(calc(100%/12*6))] w-full h-[calc(100%/12*1)] px-8 text-sm text-white"
       :style="returnStyle"
@@ -218,11 +221,13 @@
       <div class="absolute w-full h-[calc(100%/12*1)] top-[calc(100%/12*9)]">
         <button
           class="relative w-[60%] h-[100%] top-0 left-0 float-left"
+          :style="couponStyle"
           type="button"
           @click="onClickCopyCoupon"
         ></button>
         <button
           class="relative w-[40%] h-[100%] top-0 right-0 float-right"
+          :style="couponStyle"
           type="button"
           @click="onClickRedeemCoupon"
         ></button>
@@ -238,7 +243,7 @@
         ></button>
       </div>
     </div>
-    <no-ssr
+    <!-- <client-only
       ><div id="award1" :class="carouselCellClass" :style="awardPageStyle">
         <div :class="cellContentClass">
           <AwardWinnerContent
@@ -246,8 +251,8 @@
             :awardData="awardPageData1"
           />
         </div></div
-    ></no-ssr>
-    <no-ssr
+    ></client-only>
+    <client-only
       ><div id="award2" :class="carouselCellClass" :style="awardPageStyle">
         <div :class="cellContentClass">
           <AwardWinnerContent
@@ -255,8 +260,8 @@
             :awardData="awardPageData2"
           />
         </div></div
-    ></no-ssr>
-    <no-ssr
+    ></client-only>
+    <client-only
       ><div id="award3" :class="carouselCellClass" :style="awardPageStyle">
         <div :class="cellContentClass">
           <AwardWinnerContent
@@ -264,18 +269,111 @@
             :awardData="awardPageData3"
           />
         </div></div
-    ></no-ssr>
+    ></client-only> -->
+
+    <div
+      class="absolute w-full h-[240px] top-[calc(100%/12*1.8)]"
+      :style="onReturnVisibility"
+    >
+      <swiper
+        ref="mySwiper"
+        :options="swiperOptions"
+        :style="{ height: respHeight * sliderHeightRatio + 'px' }"
+      >
+        <swiper-slide :class="slideClass">
+          <p class="mb-4">
+            01/24~01/31【#CNY2022 口令紅包】 輸入指定通關密語，可獲得相應獎勵
+          </p>
+          <p class="mb-4">
+            01/25~02/07 【迎新春 開紅包】
+            玩家完成任務，開啟紅包可獲得獎勵；輸入好友的邀請碼開啟紅包可獲得額外加碼獎勵
+          </p>
+          <p class="mb-4">
+            01/26~02/08 【新春快樂：兌換】 完成每日任務即可兌換豐富獎勵
+          </p></swiper-slide
+        >
+        <swiper-slide :class="slideClass">
+          <p class="mb-4">
+            01/24~01/31【#CNY2022 口令紅包】 輸入指定通關密語，可獲得相應獎勵
+          </p>
+          <p class="mb-4">
+            01/25~02/07 【迎新春 開紅包】
+            玩家完成任務，開啟紅包可獲得獎勵；輸入好友的邀請碼開啟紅包可獲得額外加碼獎勵
+          </p>
+          <p class="mb-4">
+            01/26~02/08 【新春快樂：兌換】 完成每日任務即可兌換豐富獎勵
+          </p></swiper-slide
+        >
+        <swiper-slide :class="slideClass">
+          <p class="mb-4">
+            01/24~01/31【#CNY2022 口令紅包】 輸入指定通關密語，可獲得相應獎勵
+          </p>
+          <p class="mb-4">
+            01/25~02/07 【迎新春 開紅包】
+            玩家完成任務，開啟紅包可獲得獎勵；輸入好友的邀請碼開啟紅包可獲得額外加碼獎勵
+          </p>
+          <p class="mb-4">
+            01/26~02/08 【新春快樂：兌換】 完成每日任務即可兌換豐富獎勵
+          </p></swiper-slide
+        >
+        <swiper-slide :class="slideClass"
+          ><AwardWinnerContent
+            :initialDate="'1/20'"
+            :awardData="awardPageData1"
+        /></swiper-slide>
+        <swiper-slide :class="slideClass"
+          ><AwardWinnerContent
+            :initialDate="'1/21'"
+            :awardData="awardPageData2"
+        /></swiper-slide>
+        <swiper-slide :class="slideClass"
+          ><AwardWinnerContent
+            :initialDate="'1/22'"
+            :awardData="awardPageData3"
+        /></swiper-slide>
+        <div class="swiper-pagination bottom-0" slot="pagination"></div>
+      </swiper>
+    </div>
+
+    <Modal :data="modalData" @modal-confirm="onModalConfirm"/>
   </div>
 </template>
+
+<style>
+.swiper-pagination-bullet-active {
+  opacity: 1;
+  background: white;
+}
+</style>
 
 <script>
 import { dates, months, years } from "../assets/calender";
 import luckTbl from "../assets/table.json";
+import { Swiper, SwiperSlide, directive } from "vue-awesome-swiper";
+import "swiper/css/swiper.css";
 export default {
   name: "NuxtTutorial",
-  components: {},
+  components: {
+    Swiper,
+    SwiperSlide,
+  },
+  directives: {
+    swiper: directive,
+  },
   data() {
     return {
+      swiperOptions: {
+        slidesPerView: 1.2,
+        centeredSlides: true,
+        spaceBetween: "3%",
+        pagination: {
+          el: ".swiper-pagination",
+        },
+        autoplay: {
+          delay: 999999,
+          disableOnInteraction: false,
+        },
+      },
       unityInstance: null,
       flkty: null,
       w2hRatio: 1.922705314009662,
@@ -306,6 +404,14 @@ export default {
         "mr-2.5": true,
         rounded: true,
         "bg-[#2f242099]": true,
+      },
+      slideClass: {
+        "bg-[#2f242099]": true,
+        rounded: true,
+        "p-5": true,
+        "mobile:text-sm": true,
+        "text-xs": true,
+        "text-[gold]": true,
       },
       cellContentClass: {
         "m-[20px]": true,
@@ -338,6 +444,10 @@ export default {
       gameUidFieldLength: 0,
       gameUidFieldVerified: false,
       userNameFieldVerified: false,
+      modalData: null,
+      couponStyle:{
+        display: "none"
+      }
     };
   },
   beforeMount() {
@@ -386,9 +496,9 @@ export default {
           this.awardPageStyle.display = "block";
 
           this.$nextTick(() => {
-            this.$refs.flickity.append(el1);
-            this.$refs.flickity.append(el2);
-            this.$refs.flickity.append(el3);
+            // this.$refs.flickity.append(el1);
+            // this.$refs.flickity.append(el2);
+            // this.$refs.flickity.append(el3);
           });
           break;
         case "update_luck":
@@ -413,6 +523,7 @@ export default {
       this.onReturnVisibility.visibility =
         this.nowState === "return" ? "visible" : "hidden";
       this.resultStyle.display = this.nowState === "result" ? "block" : "none";
+      this.couponStyle.display = this.gameUidFieldVerified ? "block" : "none";
     });
   },
   mounted() {
@@ -452,6 +563,8 @@ export default {
     dates("option");
     months("option");
     years("option", 1922, 2022);
+
+    this.onResize();
   },
   unmounted() {
     window.removeEventListener("resize", this.onResize);
@@ -538,14 +651,28 @@ export default {
       if (this.unityInstance != null)
         this.unityInstance.SendMessage("日", "OnReceiveDialogInputValue", val);
     },
+    onModalConfirm(e){
+      this.modalData={
+          show: false,
+          message: ""
+        };
+    },
     onClickSubmitOnGameUIDNotPass(e) {
       const field = document.getElementById("input-gameuid");
       if (field.value.length > 0 && this.gameUidFieldVerified == false) {
-        alert("遊戲UID必須介於5~12位數字之間");
+        // alert("遊戲UID必須介於5~12位數字之間");
+        this.modalData={
+          show: true,
+          message: "遊戲UID必須介於5~12位數字之間"
+        };
         return;
       }
       if (this.userNameFieldVerified == false) {
-        alert("請輸入姓名");
+        // alert("請輸入姓名");
+        this.modalData={
+          show: true,
+          message: "請輸入姓名"
+        };
         return;
       }
 
@@ -553,7 +680,11 @@ export default {
         this.unityInstance.SendMessage("Main Camera", "StartPlay");
     },
     onClickCopyCoupon(e) {
-      alert("已複製到剪貼簿");
+      // alert("已複製到剪貼簿");
+      this.modalData={
+          show: true,
+          message: "已複製到剪貼簿"
+        };
       var temp = document.createElement("input");
       temp.value = "BTRUZBZQ79";
       document.body.appendChild(temp);
