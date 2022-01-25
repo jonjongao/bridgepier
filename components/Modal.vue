@@ -41,14 +41,16 @@ export default {
   },
   watch: {
     data: function (newVal, oldVal) {
-      if (Boolean(this.data.show)) {
-        this.modalClass.visible = true;
-        this.modalClass.invisible = false;
-        this.modalClass["pointer-events-none"] = false;
-      } else {
-        this.modalClass.visible = false;
+      console.log(newVal);
+      if (newVal==null || Boolean(newVal.show)==false) {
+       this.modalClass.visible = false;
         this.modalClass.invisible = true;
         this.modalClass["pointer-events-none"] = true;
+      } else {
+        
+         this.modalClass.visible = true;
+        this.modalClass.invisible = false;
+        this.modalClass["pointer-events-none"] = false;
       }
     },
   },

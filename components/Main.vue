@@ -1,4 +1,3 @@
-<!-- Please remove this file from your project -->
 <template>
   <div
     id="unity-container"
@@ -28,73 +27,10 @@
         class="relative w-[50%] h-[150%] bottom-[50%] pointer-events-auto"
         type="button"
         :style="returnStyle"
-        @click="onClickSubmitOnGameUIDNotPass"
+        @click="onClickSubmit"
       ></button>
     </div>
 
-    <!-- <client-only
-      ><flickity
-        ref="flickity"
-        :options="flickityOpts"
-        class="carousel absolute top-[15%] w-full z-10 border-0"
-        :style="onReturnVisibility"
-      >
-        <div
-          :class="carouselCellClass"
-          :style="{ height: respHeight * sliderHeightRatio + 'px' }"
-        >
-          <div :class="cellContentClass">
-            <p class="mb-4">
-              01/24~01/31【#CNY2022 口令紅包】 輸入指定通關密語，可獲得相應獎勵
-            </p>
-            <p class="mb-4">
-              01/25~02/07 【迎新春 開紅包】
-              玩家完成任務，開啟紅包可獲得獎勵；輸入好友的邀請碼開啟紅包可獲得額外加碼獎勵
-            </p>
-            <p class="mb-4">
-              01/26~02/08 【新春快樂：兌換】 完成每日任務即可兌換豐富獎勵
-            </p>
-          </div>
-        </div>
-        <div
-          :class="carouselCellClass"
-          :style="{ height: respHeight * sliderHeightRatio + 'px' }"
-        >
-          <div :class="cellContentClass">
-            <p class="mb-4">
-              01/28~02/10【春節幸運輪盤】
-              玩家可通過購買指針，可進行最多3次的抽獎
-            </p>
-            <p class="mb-4">01/29~02/02【春節組隊】 和好友組隊遊戲可獲得獎勵</p>
-            <p class="mb-4">
-              01/29~02/07【鴻運長龍】
-              邀請好友拼接長龍，按累計遊戲場次數解鎖相關進度獎勵
-            </p>
-          </div>
-        </div>
-        <div
-          :class="carouselCellClass"
-          :style="{ height: respHeight * sliderHeightRatio + 'px' }"
-        >
-          <div :class="cellContentClass">
-            <p class="mb-4">
-              01/31~02/01【新春好禮】 大年初一當天在線達60分鐘即可獲得獎勵
-            </p>
-            <p class="mb-4">
-              01/31~02/03【紅包雨】
-              晚上8：00−8：30，遊戲大廳內會持續下起紅包雨，點擊紅包可獲得獎勵
-            </p>
-            <p class="mb-4">
-              02/01~02/03【#YearofTiger 口令紅包】
-              輸入指定通關密語，可獲得相應獎勵
-            </p>
-            <p class="mb-4">
-              02/04~02/06【新春週末】 累計進入top10達10次可獲得獎勵
-            </p>
-          </div>
-        </div>
-      </flickity></client-only
-    > -->
     <div
       class="absolute top-[calc(calc(100%/12*6))] w-full h-[calc(100%/12*1)] px-8 text-sm text-white"
       :style="returnStyle"
@@ -243,33 +179,6 @@
         ></button>
       </div>
     </div>
-    <!-- <client-only
-      ><div id="award1" :class="carouselCellClass" :style="awardPageStyle">
-        <div :class="cellContentClass">
-          <AwardWinnerContent
-            :initialDate="'1/20'"
-            :awardData="awardPageData1"
-          />
-        </div></div
-    ></client-only>
-    <client-only
-      ><div id="award2" :class="carouselCellClass" :style="awardPageStyle">
-        <div :class="cellContentClass">
-          <AwardWinnerContent
-            :initialDate="'1/21'"
-            :awardData="awardPageData2"
-          />
-        </div></div
-    ></client-only>
-    <client-only
-      ><div id="award3" :class="carouselCellClass" :style="awardPageStyle">
-        <div :class="cellContentClass">
-          <AwardWinnerContent
-            :initialDate="'1/22'"
-            :awardData="awardPageData3"
-          />
-        </div></div
-    ></client-only> -->
 
     <div
       class="absolute w-full h-[240px] top-[calc(100%/12*1.8)]"
@@ -316,26 +225,24 @@
             01/26~02/08 【新春快樂：兌換】 完成每日任務即可兌換豐富獎勵
           </p></swiper-slide
         >
-        <swiper-slide :class="slideClass"
-          ><AwardWinnerContent
-            :initialDate="'1/20'"
-            :awardData="awardPageData1"
-        /></swiper-slide>
-        <swiper-slide :class="slideClass"
-          ><AwardWinnerContent
-            :initialDate="'1/21'"
-            :awardData="awardPageData2"
-        /></swiper-slide>
-        <swiper-slide :class="slideClass"
-          ><AwardWinnerContent
-            :initialDate="'1/22'"
-            :awardData="awardPageData3"
-        /></swiper-slide>
+
+        <swiper-slide v-for="page in awardPageData" :key="page.date" :class="slideClass"
+          >
+          <AwardWinnerContent
+            :initialDate="'不久後'"
+            :awardData="page"
+        />
+        </swiper-slide>
         <div class="swiper-pagination bottom-0" slot="pagination"></div>
       </swiper>
     </div>
 
-    <Modal :data="modalData" @modal-confirm="onModalConfirm"/>
+    <Modal :data="modalData" @modal-confirm="onModalConfirm" />
+    <Firebase
+      ref="firebase"
+      :data="userData"
+      @verify-result="onUserVerifyResult"
+    />
   </div>
 </template>
 
@@ -370,7 +277,7 @@ export default {
           el: ".swiper-pagination",
         },
         autoplay: {
-          delay: 999999,
+          delay: 5000,
           disableOnInteraction: false,
         },
       },
@@ -432,7 +339,13 @@ export default {
         display: "none",
         height: "240px",
       },
-      awradPageData: [],
+      awardPageData: [
+        // {
+        //   date:"hello",
+        //   username:["hello"],
+        //   gameuid:["hello"]
+        // },
+      ],
       awardPageData1: null,
       awardPageData2: null,
       awardPageData3: null,
@@ -445,15 +358,26 @@ export default {
       gameUidFieldVerified: false,
       userNameFieldVerified: false,
       modalData: null,
-      couponStyle:{
-        display: "none"
-      }
+      couponStyle: {
+        display: "none",
+      },
+      userData: {
+        phoneNumber: null,
+        emailAddress: null,
+        userName: null,
+        dateBirth: null,
+        gameUid: null,
+        luckData: null,
+      },
+      userBirthday: {
+        year: null,
+        month: null,
+        day: null,
+      },
     };
   },
   beforeMount() {
     document.addEventListener("onReceiveEventFromUnity", (e) => {
-      console.log("receive event");
-      console.log(e);
       const j = JSON.parse(e.detail);
       const key = j["state"];
       switch (key) {
@@ -468,14 +392,17 @@ export default {
           this.nowState = "result";
           break;
         case "update_award":
+          if(j["data"]=='')return;
           const awardData = JSON.parse(j["data"]);
+          if(Object.keys(awardData).length===0)return;
+          console.log(awardData);
+          
           let pageData = [];
           for (var p = 0; p < awardData["pages"].length; p++) {
             const aPage = awardData["pages"][p];
             pageData.push(aPage);
           }
-          this.awradPageData = pageData;
-
+          this.awardPageData = pageData;
           console.log("length:" + awardData);
           if (awardData["pages"].length > 1) {
             this.awardPageData1 = awardData["pages"][0];
@@ -494,15 +421,9 @@ export default {
           var el2 = document.querySelector("#award2");
           var el3 = document.querySelector("#award3");
           this.awardPageStyle.display = "block";
-
-          this.$nextTick(() => {
-            // this.$refs.flickity.append(el1);
-            // this.$refs.flickity.append(el2);
-            // this.$refs.flickity.append(el3);
-          });
           break;
         case "update_luck":
-          const luckData = JSON.parse(j["data"]);
+          let luckData = JSON.parse(j["data"]);
           const luckLvl = luckData.lvl;
 
           this.yearLabel = luckData.lunarYearLabel;
@@ -515,7 +436,9 @@ export default {
               text: luckTbl[luckLvl]["poem"][arr[luckData.differ[i]]],
             };
           }
-
+          luckData.date = this.nowYYYYMMDD;
+          this.userData.luckData = luckData;
+          this.$refs.firebase.submitUser(this.userData);
           break;
       }
 
@@ -531,17 +454,13 @@ export default {
     document.addEventListener("onUnityInstanceCreated", (e) => {
       let instance = e.detail;
       this.unityInstance = e.detail;
-      console.log("unity instanced");
-      console.log(e);
       document.addEventListener("click", function (e) {
         if (e.target.id == "unity-canvas") {
           // Clicked on canvas
           document.activeElement.blur();
-          console.log("click canvas");
           instance.SendMessage("Main Camera", "FocusCanvas", "1");
         } else {
           // Clicked outside of canvas
-          console.log("outside canvas");
           instance.SendMessage("Main Camera", "FocusCanvas", "0");
         }
       });
@@ -550,11 +469,9 @@ export default {
         if (e.target.id == "unity-canvas" && e.touches.length == 1) {
           // Clicked on canvas
           document.activeElement.blur();
-          console.log("click canvas");
           instance.SendMessage("Main Camera", "FocusCanvas", "1");
         } else {
           // Clicked outside of canvas
-          console.log("outside canvas");
           instance.SendMessage("Main Camera", "FocusCanvas", "0");
         }
       });
@@ -563,11 +480,15 @@ export default {
     dates("option");
     months("option");
     years("option", 1922, 2022);
-
+    this.$refs.years.value = 2022;
+    this.onYearFieldChange({ target: this.$refs.years });
+    this.onMonthFieldChange({ target: this.$refs.months });
+    this.onDayFieldChange({ target: this.$refs.dates });
     this.onResize();
   },
   unmounted() {
     window.removeEventListener("resize", this.onResize);
+    document.removeEventListener("onUnityInstanceCreated");
   },
   methods: {
     onResize() {
@@ -597,18 +518,22 @@ export default {
     },
     onReceiveEventFromUnity(e) {},
     onGameUIDFieldChange(e) {
-      const str = e.target.value;
-      const lastChar = str.charAt(str.length - 1);
-      if (isNaN(parseInt(lastChar))) {
-        e.target.value = str.slice(0, -1);
-        return;
+      if (e.target.value.length > 0) {
+        const str = e.target.value;
+        const lastChar = str.charAt(str.length - 1);
+        if (isNaN(parseInt(lastChar))) {
+          e.target.value = str.slice(0, -1);
+          return;
+        }
       }
+      console.log(e.target.value == "");
       this.gameUidFieldLength = e.target.value.length;
       if (e.target.value.length >= 5 && e.target.value.length <= 12) {
         this.gameUidFieldVerified = true;
       } else {
         this.gameUidFieldVerified = false;
       }
+      this.userData.gameUid = e.target.value;
       if (this.unityInstance != null)
         this.unityInstance.SendMessage(
           "輸入《絕地求生M》UID",
@@ -619,7 +544,7 @@ export default {
     onUserNameFieldChange(e) {
       if (e.target.value.length > 0) this.userNameFieldVerified = true;
       else this.userNameFieldVerified = false;
-
+      this.userData.userName = e.target.value;
       if (this.unityInstance != null)
         this.unityInstance.SendMessage(
           "輸入姓名",
@@ -628,6 +553,7 @@ export default {
         );
     },
     onYearFieldChange(e) {
+      this.userBirthday.year = e.target.value;
       if (this.unityInstance != null)
         this.unityInstance.SendMessage(
           "西元",
@@ -640,6 +566,7 @@ export default {
         minimumIntegerDigits: 2,
         useGrouping: false,
       });
+      this.userBirthday.month = val;
       if (this.unityInstance != null)
         this.unityInstance.SendMessage("月", "OnReceiveDialogInputValue", val);
     },
@@ -648,43 +575,39 @@ export default {
         minimumIntegerDigits: 2,
         useGrouping: false,
       });
+      this.userBirthday.day = val;
       if (this.unityInstance != null)
         this.unityInstance.SendMessage("日", "OnReceiveDialogInputValue", val);
     },
-    onModalConfirm(e){
-      this.modalData={
-          show: false,
-          message: ""
-        };
+    onModalConfirm(e) {
+      this.modalData = null;
     },
-    onClickSubmitOnGameUIDNotPass(e) {
+    onClickSubmit(e) {
       const field = document.getElementById("input-gameuid");
       if (field.value.length > 0 && this.gameUidFieldVerified == false) {
-        // alert("遊戲UID必須介於5~12位數字之間");
-        this.modalData={
+        this.modalData = {
           show: true,
-          message: "遊戲UID必須介於5~12位數字之間"
+          message: "遊戲UID必須介於5~12位數字之間",
         };
         return;
       }
       if (this.userNameFieldVerified == false) {
-        // alert("請輸入姓名");
-        this.modalData={
+        this.modalData = {
           show: true,
-          message: "請輸入姓名"
+          message: "請輸入姓名",
         };
         return;
       }
 
-      if (this.unityInstance != null)
-        this.unityInstance.SendMessage("Main Camera", "StartPlay");
+      this.userData.dateBirth = this.userBirthdayYYYYMMDD;
+      this.$refs.firebase.verifyUser(this.userData);
     },
     onClickCopyCoupon(e) {
       // alert("已複製到剪貼簿");
-      this.modalData={
-          show: true,
-          message: "已複製到剪貼簿"
-        };
+      this.modalData = {
+        show: true,
+        message: "已複製到剪貼簿",
+      };
       var temp = document.createElement("input");
       temp.value = "BTRUZBZQ79";
       document.body.appendChild(temp);
@@ -711,6 +634,23 @@ export default {
       if (this.unityInstance != null)
         this.unityInstance.SendMessage("Main Camera", "Return");
     },
+    onUserVerifyResult(e) {
+      if (e.exist && e.result) {
+        // Update existing user
+        if (this.unityInstance != null)
+          this.unityInstance.SendMessage("Main Camera", "StartPlay");
+      } else if (e.result) {
+        // New user
+        if (this.unityInstance != null)
+          this.unityInstance.SendMessage("Main Camera", "StartPlay");
+      } else {
+        // Error
+        this.modalData = {
+          show: true,
+          message: e.message,
+        };
+      }
+    },
     zhMonthToNumber(month) {
       const m = [
         "一月",
@@ -732,6 +672,43 @@ export default {
       return -1;
     },
   },
-  computed: {},
+  computed: {
+    userBirthdayYYYYMMDD: {
+      get: function () {
+        return (
+          this.userBirthday.year +
+          "-" +
+          this.userBirthday.month +
+          "-" +
+          this.userBirthday.day
+        );
+      },
+      set: function (years, months, dates) {
+        this.userBirthday.year = years;
+        this.userBirthday.month = months;
+        this.userBirthday.day = dates;
+      },
+    },
+    nowYYYYMMDD() {
+      const d = new Date();
+      const mm = d.getMonth() + 1; // getMonth() is zero-based
+      const dd = d.getDate();
+      d.getHours();
+      d.getMinutes();
+      d.getSeconds();
+
+      return [
+        d.getFullYear(),
+        mm.toLocaleString("zh-TW", {
+          minimumIntegerDigits: 2,
+          useGrouping: false,
+        }),
+        dd.toLocaleString("zh-TW", {
+          minimumIntegerDigits: 2,
+          useGrouping: false,
+        }),
+      ].join("-");
+    },
+  },
 };
 </script>
