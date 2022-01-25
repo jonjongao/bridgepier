@@ -208,7 +208,7 @@ export default {
             obj.pages.push(aPage);
           }
         }
-        console.log(obj);
+        // console.log(obj);
         this.$emit("award-result", obj);
       }
     },
