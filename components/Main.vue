@@ -181,7 +181,7 @@
     </div>
 
     <div
-      class="absolute w-full h-[240px] top-[calc(100%/12*1.8)]"
+      class="absolute w-full h-[240px] top-[calc(100%/12*1.9)]"
       :style="onReturnVisibility"
     >
       <swiper
@@ -226,12 +226,12 @@
           </p></swiper-slide
         >
 
-        <swiper-slide v-for="page in awardPageData" :key="page.date" :class="slideClass"
-          >
-          <AwardWinnerContent
-            :initialDate="'不久後'"
-            :awardData="page"
-        />
+        <swiper-slide
+          v-for="page in awardPageData"
+          :key="page.date"
+          :class="slideClass"
+        >
+          <AwardWinnerContent :initialDate="'不久後'" :awardData="page" />
         </swiper-slide>
         <div class="swiper-pagination bottom-0" slot="pagination"></div>
       </swiper>
@@ -242,6 +242,7 @@
       ref="firebase"
       :data="userData"
       @verify-result="onUserVerifyResult"
+      @award-result="onAwardResult"
     />
   </div>
 </template>
@@ -270,9 +271,9 @@ export default {
   data() {
     return {
       swiperOptions: {
-        slidesPerView: 1.2,
+        slidesPerView: 1.105,
         centeredSlides: true,
-        spaceBetween: "3%",
+        spaceBetween: "2.1%",
         pagination: {
           el: ".swiper-pagination",
         },
@@ -304,14 +305,7 @@ export default {
         prevNextButtons: false,
         pageDots: true,
       },
-      carouselCellClass: {
-        "carousel-cell": true,
-        "w-[90%]": true,
-        // "h-[240px]": true,
-        "mr-2.5": true,
-        rounded: true,
-        "bg-[#2f242099]": true,
-      },
+
       slideClass: {
         "bg-[#2f242099]": true,
         rounded: true,
@@ -392,35 +386,12 @@ export default {
           this.nowState = "result";
           break;
         case "update_award":
-          if(j["data"]=='')return;
+          if (j["data"] == "") return;
           const awardData = JSON.parse(j["data"]);
-          if(Object.keys(awardData).length===0)return;
+          if (Object.keys(awardData).length === 0) return;
           console.log(awardData);
-          
-          let pageData = [];
-          for (var p = 0; p < awardData["pages"].length; p++) {
-            const aPage = awardData["pages"][p];
-            pageData.push(aPage);
-          }
-          this.awardPageData = pageData;
-          console.log("length:" + awardData);
-          if (awardData["pages"].length > 1) {
-            this.awardPageData1 = awardData["pages"][0];
-            console.log("get award 1");
-          }
-          if (awardData["pages"].length > 2) {
-            this.awardPageData2 = awardData["pages"][1];
-            console.log("get award 2");
-          }
-          if (awardData["pages"].length > 3) {
-            this.awardPageData3 = awardData["pages"][2];
-            console.log("get award 3");
-          }
 
-          var el1 = document.querySelector("#award1");
-          var el2 = document.querySelector("#award2");
-          var el3 = document.querySelector("#award3");
-          this.awardPageStyle.display = "block";
+          onAwardResult(awardData);
           break;
         case "update_luck":
           let luckData = JSON.parse(j["data"]);
@@ -485,6 +456,8 @@ export default {
     this.onMonthFieldChange({ target: this.$refs.months });
     this.onDayFieldChange({ target: this.$refs.dates });
     this.onResize();
+
+    this.$refs.firebase.getAward();
   },
   unmounted() {
     window.removeEventListener("resize", this.onResize);
@@ -526,7 +499,6 @@ export default {
           return;
         }
       }
-      console.log(e.target.value == "");
       this.gameUidFieldLength = e.target.value.length;
       if (e.target.value.length >= 5 && e.target.value.length <= 12) {
         this.gameUidFieldVerified = true;
@@ -650,6 +622,16 @@ export default {
           message: e.message,
         };
       }
+    },
+    onAwardResult(e) {
+      const awardData = e;
+      let pageData = [];
+      for (var p = 0; p < awardData["pages"].length; p++) {
+        const aPage = awardData["pages"][p];
+        pageData.push(aPage);
+      }
+      this.awardPageData = pageData;
+      this.awardPageStyle.display = "block";
     },
     zhMonthToNumber(month) {
       const m = [

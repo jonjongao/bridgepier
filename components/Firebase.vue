@@ -60,7 +60,7 @@ export default {
 
       const dbRef = ref(getDatabase());
       const db = getDatabase();
-      const snapshot = await get(child(dbRef, `users/` + id));
+      const snapshot = await get(child(dbRef, "users/" + id));
       if (snapshot.exists()) {
         if (data.gameUid != "none" || data.gameUid != null) {
           if (
@@ -174,6 +174,64 @@ export default {
         });
       }
     },
+    async getAward() {
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      const snapshot = await get(child(dbRef, "award"));
+      if (snapshot.exists()) {
+        const list = snapshot.val();
+
+        let obj = {
+          pages: [],
+        };
+
+        for (var key in list) {
+          if (list.hasOwnProperty(key)) {
+            let aPage = {
+              date: "",
+              gameuid: [],
+              username: [],
+            };
+            const month = parseInt(key.split("-")[1]);
+            const day = parseInt(key.split("-")[2]);
+            aPage.date = month + "/" + day;
+            for (var id in list[key]["users"]) {
+              let uid = list[key]["users"][id];
+              let username = "";
+              const snapshot = await get(child(dbRef, "users/" + uid));
+              if (snapshot.exists()) {
+                username = snapshot.val().username;
+                aPage.gameuid.push(uid);
+                aPage.username.push(this.encryptUserName(username));
+              }
+            }
+            obj.pages.push(aPage);
+          }
+        }
+        console.log(obj);
+        this.$emit("award-result", obj);
+      }
+    },
+    encryptUserName(username)
+    {
+        let en = "";
+        const replaceLength = (username.length-1)-1;
+        if(replaceLength<0){}
+        else if(replaceLength==0)
+        {
+            en=username[0]+'*';
+        }
+        else
+        {
+            en=username[0];
+            for(var i=0;i<replaceLength;i++)
+            {
+                en+='*';
+            }
+            en+=username[username.length-1];
+        }
+        return en;
+    }
   },
   computed: {
     now() {
