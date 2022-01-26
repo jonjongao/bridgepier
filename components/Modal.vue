@@ -41,7 +41,7 @@ export default {
   },
   watch: {
     data: function (newVal, oldVal) {
-      console.log(newVal);
+      // console.log(newVal);
       if (newVal==null || Boolean(newVal.show)==false) {
        this.modalClass.visible = false;
         this.modalClass.invisible = true;

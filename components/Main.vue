@@ -377,19 +377,22 @@ export default {
       switch (key) {
         case "return":
           this.nowState = "return";
+          this.postMessageToParent("on-mainmenu", "200");
           break;
         case "start_play":
           this.nowState = "start_play";
+          this.postMessageToParent("on-startplay", "200");
           break;
         case "result":
           const hasUid = j["hasuid"] === "True";
           this.nowState = "result";
+          this.postMessageToParent("on-result", "200");
           break;
         case "update_award":
           if (j["data"] == "") return;
           const awardData = JSON.parse(j["data"]);
           if (Object.keys(awardData).length === 0) return;
-          console.log(awardData);
+          // console.log(awardData);
 
           onAwardResult(awardData);
           break;
@@ -446,6 +449,8 @@ export default {
           instance.SendMessage("Main Camera", "FocusCanvas", "0");
         }
       });
+
+      this.postMessageToParent("game-initialized", "200");
     });
 
     dates("option");
@@ -483,7 +488,7 @@ export default {
     },
     getAwardPageData(index) {
       try {
-        console.log(this.awradPageData[index - 1]);
+        // console.log(this.awradPageData[index - 1]);
         return this.awardPageData[index - 1];
       } catch (e) {
         console.log("get award page data error");
@@ -561,6 +566,7 @@ export default {
           show: true,
           message: "遊戲UID必須介於5~12位數字之間",
         };
+        this.postMessageToParent("on-submit", "406");
         return;
       }
       if (this.userNameFieldVerified == false) {
@@ -568,11 +574,13 @@ export default {
           show: true,
           message: "請輸入姓名",
         };
+        this.postMessageToParent("on-submit", "406");
         return;
       }
 
       this.userData.dateBirth = this.userBirthdayYYYYMMDD;
       this.$refs.firebase.verifyUser(this.userData);
+      this.postMessageToParent("on-submit", "200");
     },
     onClickCopyCoupon(e) {
       // alert("已複製到剪貼簿");
@@ -586,25 +594,30 @@ export default {
       temp.select();
       document.execCommand("copy");
       document.body.removeChild(temp);
+      this.postMessageToParent("copy-coupon", "200");
     },
     onClickRedeemCoupon(e) {
       window.open("https://pubgm.tw/redeem");
+      this.postMessageToParent("redeem-coupon", "200");
     },
     onClickFacebookShare(e) {
       FB.ui(
         {
           method: "share",
-          href: "https://www.pubgmobile.com/TW/event/dreamteam/",
+          href: "https://pubgm-2022-firstquarter-event.com.tw/",
         },
         function (response) {}
       );
+      this.postMessageToParent("fb-share", "200");
     },
     onClickDownloadApp(e) {
       window.open("https://pubgm.tw/tigeryear");
+      this.postMessageToParent("download-app", "200");
     },
     onClickReturn(e) {
       if (this.unityInstance != null)
         this.unityInstance.SendMessage("Main Camera", "Return");
+      this.postMessageToParent("click-return", "200");
     },
     onUserVerifyResult(e) {
       if (e.exist && e.result) {
@@ -652,6 +665,13 @@ export default {
         if (month === m[i]) return i + 1;
       }
       return -1;
+    },
+    postMessageToParent(type, data) {
+      const e = {
+        key: type,
+        value: data,
+      };
+      window.parent.postMessage(e, "*");
     },
   },
   computed: {
