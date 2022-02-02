@@ -16,15 +16,15 @@ import {
 } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD2rEYk-A2zGup1sUvJ4KovgJTqUcW4pj8",
-  authDomain: "pubgm-22lunar.firebaseapp.com",
+  apiKey: "AIzaSyB2bcVEy4mBxgwRBhT2aN58xnT66gk5QIU",
+  authDomain: "pubgm-jujutsu.firebaseapp.com",
+  projectId: "pubgm-jujutsu",
+  storageBucket: "pubgm-jujutsu.appspot.com",
+  messagingSenderId: "89669436824",
+  appId: "1:89669436824:web:8655c9548e0db0f9b717ed",
+  measurementId: "G-R2E7ECSZCH",
   databaseURL:
-    "https://pubgm-22lunar-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "pubgm-22lunar",
-  storageBucket: "pubgm-22lunar.appspot.com",
-  messagingSenderId: "321154347303",
-  appId: "1:321154347303:web:56ecdcdb64a26f4551b902",
-  measurementId: "G-5HJ5TMG6J1",
+    "https://pubgm-jujutsu-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 
 export default {
@@ -54,31 +54,18 @@ export default {
         this.$emit("verify-result", this.response);
       }
     },
-    async userExist(data) {
-      let id = data.gameUid + "_" + data.userName + "_" + data.dateBirth;
-      if (data.gameUid != "none" || data.gameUid != null) id = data.gameUid;
+    async userExist(email) {
+      let id = email.replace("@", "-at-").replace(".", "-dot-");
+      console.log(id);
 
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
       if (snapshot.exists()) {
-        if (data.gameUid != "none" || data.gameUid != null) {
-          if (
-            (data.userName == snapshot.val().username) == false ||
-            (data.dateBirth == snapshot.val().datebirth) == false
-          ) {
-            return {
-              exist: true,
-              result: false,
-              message: "此UID已被使用，且輸入的姓名或生日和紀錄不相符",
-            };
-          }
-        }
-
         return {
           exist: true,
           result: true,
-          message: "加入新的抽籤資料",
+          message: "此電子郵件已被使用",
         };
       } else {
         return {
@@ -116,122 +103,91 @@ export default {
       // const unixtime = Date.now();
       // RealtimeDB版本
       const db = getDatabase();
+      const id = data.emailaddress.replace("@", "-at-").replace(".", "-dot-");
 
-      const email = data.emailAddress === null ? "" : data.emailAddress;
-      const number = data.phoneNumber === null ? "" : data.phoneNumber;
-      const name = data.userName;
-      const birth = data.dateBirth;
-      const uid =
-        data.gameUid === null || data.gameUid == "" ? "none" : data.gameUid;
+      data.datecreate = unixtime;
+      data.lastplaytimestamp = unixtime;
+      data.lastplaydate = this.now;
 
-      let id = uid + "_" + name + "_" + birth;
-      if (data.gameUid != "none" || data.gameUid != null) id = uid;
-
-      if (data.gameUid == "none" || data.gameUid == null) {
-        const post = await push(ref(db, "users"));
-        set(post, {
-          datecreate: unixtime,
-          mailaddress: email,
-          phonenumber: number,
-          username: name,
-          datebirth: birth,
-          gameuid: uid,
-          hasaward: false,
-          dateaward: "",
-          chim: {
-            [this.now]: {
-              servertime: unixtime,
-              date: data.luckData.date,
-              lvl: data.luckData.lvl,
-              lvlStr: data.luckData.lvlStr,
-              lunarYearLabel: data.luckData.lunarYearLabel,
-              monthDayLabel: data.luckData.monthDayLabel,
-              differ: data.luckData.differ,
-            },
-          },
-        });
-      } else {
-        await set(ref(db, "users/" + id), {
-          datecreate: unixtime,
-          mailaddress: email,
-          phonenumber: number,
-          username: name,
-          datebirth: birth,
-          gameuid: uid,
-          hasaward: false,
-          dateaward: "",
-          chim: {
-            [this.now]: {
-              servertime: unixtime,
-              date: data.luckData.date,
-              lvl: data.luckData.lvl,
-              lvlStr: data.luckData.lvlStr,
-              lunarYearLabel: data.luckData.lunarYearLabel,
-              monthDayLabel: data.luckData.monthDayLabel,
-              differ: data.luckData.differ,
-            },
-          },
-        });
-      }
+      await set(ref(db, "users/" + id), data);
     },
-    async getAward() {
+    async submitTeam(data) {
+      const id =
+        data.group == "社會組"
+          ? "社會組"
+          : data.entity.city +
+            "-" +
+            data.entity.zone +
+            "-" +
+            data.entity.school;
+      const teamname =
+        data.group == "社會組"
+          ? "社會組"
+          : data.entity.city + data.entity.school;
       const dbRef = ref(getDatabase());
       const db = getDatabase();
-      const snapshot = await get(child(dbRef, "award"));
+      const snapshot = await get(child(dbRef, "teams/" + id));
       if (snapshot.exists()) {
-        const list = snapshot.val();
-
-        let obj = {
-          pages: [],
-        };
-
-        for (var key in list) {
-          if (list.hasOwnProperty(key)) {
-            let aPage = {
-              date: "",
-              gameuid: [],
-              username: [],
-            };
-            const month = parseInt(key.split("-")[1]);
-            const day = parseInt(key.split("-")[2]);
-            aPage.date = month + "/" + day;
-            for (var id in list[key]["users"]) {
-              let uid = list[key]["users"][id];
-              let username = "";
-              const snapshot = await get(child(dbRef, "users/" + uid));
-              if (snapshot.exists()) {
-                username = snapshot.val().username;
-                aPage.gameuid.push(uid);
-                aPage.username.push(this.encryptUserName(username));
-              }
-            }
-            obj.pages.push(aPage);
-          }
-        }
-        // console.log(obj);
-        this.$emit("award-result", obj);
+      } else {
+        await set(ref(db, "teams/" + id), {
+          teamname: teamname,
+          score: 0,
+        });
       }
     },
-    encryptUserName(username)
-    {
-        let en = "";
-        const replaceLength = (username.length-1)-1;
-        if(replaceLength<0){}
-        else if(replaceLength==0)
-        {
-            en=username[0]+'*';
+    async updateTeam(userData,resultData) {
+      const id =
+        userData.group == "社會組"
+          ? "社會組"
+          : userData.entity.city +
+            "-" +
+            userData.entity.zone +
+            "-" +
+            userData.entity.school;
+      const teamname =
+        userData.group == "社會組"
+          ? "社會組"
+          : userData.entity.city + userData.entity.school;
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      let oldScore = 0;
+      const snapshot = await get(child(dbRef, "teams/"+id));
+      if (snapshot.exists()) {
+        oldScore = snapshot.val().score;
+      }
+      console.log("get old score:"+oldScore);
+
+      update(ref(db), {
+        ["teams/" + id+"/score"]: oldScore + resultData.score,
+      });
+    },
+    async getTeam() {
+      console.log("try get team data");
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      const snapshot = await get(child(dbRef, "teams"));
+      if (snapshot.exists()) {
+        const list = snapshot.val();
+        console.log("done fetch team data");
+        console.log(list);
+        this.$emit("team-update", list);
+      }
+    },
+    encryptUserName(username) {
+      let en = "";
+      const replaceLength = username.length - 1 - 1;
+      if (replaceLength < 0) {
+      } else if (replaceLength == 0) {
+        en = username[0] + "*";
+      } else {
+        en = username[0];
+        for (var i = 0; i < replaceLength; i++) {
+          en += "*";
         }
-        else
-        {
-            en=username[0];
-            for(var i=0;i<replaceLength;i++)
-            {
-                en+='*';
-            }
-            en+=username[username.length-1];
-        }
-        return en;
-    }
+        en += username[username.length - 1];
+      }
+      return en;
+    },
   },
   computed: {
     now() {

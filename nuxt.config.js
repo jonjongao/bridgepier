@@ -4,7 +4,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: '虎你好運勢',
+    title: 'PUBGM《咒術迴戰》連動遊戲',
     htmlAttrs: {
       lang: 'zh'
     },

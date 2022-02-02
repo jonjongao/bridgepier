@@ -11,7 +11,7 @@ var config = {
     codeUrl: buildUrl + "/webgl.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
     companyName: "Battleham",
-    productName: "PUBGM 2022 LunarYear",
+    productName: "PUBGM Jujutsu",
     productVersion: "1.0",
     // showBanner: unityShowBanner,
     matchWebGLToCanvasSize: true, // Uncomment this to separately control WebGL canvas render size and DOM element size.
