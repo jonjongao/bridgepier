@@ -20,11 +20,30 @@
 
     <!-- <Checker /> -->
 
-    <Firebase ref="firebase" @team-update="onTeamUpdate" />
-    <JujutsuLeaderboard :show="step==state.titleLeaderboard" :mode="'anony'" @complete="onTitleLeaderboardComplete" />
-    <JujutsuRegist :show="step==state.regist" :firebase="firebaseInstance" @complete="onRegistComplete" />
-    <JujutsuLeaderboard :show="step==state.userLeaderboard" :team="teamData" :mode="'focus'" :data="userData" @complete="onUserLeaderboardComplete" />
-    <JujutsuGame :show="step==state.gameplay" :team="teamData" :data="userData" :game="gameResultData" />
+    <Firebase ref="firebase" @team-update="onTeamUpdate" @team-update-unit="onTeamUpdateInUnit" />
+    <JujutsuLeaderboard
+      ref="leaderboard"
+      :show="canShowLeaderboard"
+      :team="teamData"
+      :mode="leaderboardMode"
+      :data="userData"
+      @complete="onLeaderboardComplete"
+    />
+    <JujutsuRegist
+      :show="step == state.regist"
+      :firebase="firebaseInstance"
+      @complete="onRegistComplete"
+    />
+    <!-- <JujutsuLeaderboard :show="step==state.userLeaderboard" :team="teamData" :mode="'focus'" :data="userData" @complete="onUserLeaderboardComplete" /> -->
+    <JujutsuGame
+      :show="step == state.gameplay"
+      :team="teamData"
+      :data="userData"
+      :game="gameResultData"
+    />
+    <JujutsuResult :show="step == state.result" @click-return="onClickReturn" @click-download="onClickDownloadApp" @click-share="onClickFacebookShare" />
+
+    <Modal :data="modalData" @modal-confirm="onModalConfirm" />
   </div>
 </template>
 
@@ -37,8 +56,12 @@ export default {
   directives: {},
   data() {
     return {
+      modalData: {
+        show: false,
+        message: "",
+      },
       unityInstance: null,
-      firebaseInstance:null,
+      firebaseInstance: null,
       w2hRatio: 1.922705314009662,
       h2wRatio: 0.5201005025125628,
       sliderHeightRatio: 0.3015075376884422,
@@ -46,8 +69,8 @@ export default {
       respWidth: 414,
       nowState: "",
       userData: null,
-      teamData:null,
-      gameResultData:null,
+      teamData: null,
+      gameResultData: null,
       step: -1,
       state: {
         none: -1,
@@ -55,8 +78,11 @@ export default {
         regist: 1,
         userLeaderboard: 2,
         gameplay: 3,
-        result:4
+        result: 4,
       },
+      shareUrl: "https://pubgm-2022-firstquarter-event.com.tw",
+      downloadUrl: "https://pubgm.tw/tigeryear",
+      leaderboardMode: "anony",
     };
   },
   beforeMount() {
@@ -64,8 +90,11 @@ export default {
       console.log(e.detail);
       const j = JSON.parse(e.detail);
       const key = j["state"];
-      switch(key)
-      {
+      switch (key) {
+        case "return":
+
+          this.setStep(this.state.titleLeaderboard);
+          break;
         case "game-result":
           if (j["data"] == "") return;
           const data = JSON.parse(j["data"]);
@@ -73,14 +102,21 @@ export default {
           const numKill = data["killed"];
           const lvl = data["lvl"];
           const score = data["score"];
-          this.gameResultData={
-            feeded:numFeededFinger,
-            killed:numKill,
-            lvl:lvl,
-            score: score
+          this.gameResultData = {
+            feeded: numFeededFinger,
+            killed: numKill,
+            lvl: lvl,
+            score: score,
           };
 
           this.firebaseInstance.updateTeam(this.userData, this.gameResultData);
+          break;
+        case "game-finish":
+          this.setStep(this.state.result);
+          break;
+        case "facebook_share":
+          break;
+        case "download_app":
           break;
       }
     });
@@ -114,22 +150,26 @@ export default {
 
       this.postMessageToParent("game-initialized", "200");
 
-      
+      this.setStep(this.state.titleLeaderboard);
     });
 
     this.onResize();
 
-    this.step=this.state.titleLeaderboard;
-
     this.firebaseInstance = this.$refs.firebase;
 
-    
+    this.firebaseInstance.getTeam();
   },
   unmounted() {
     window.removeEventListener("resize", this.onResize);
     document.removeEventListener("onUnityInstanceCreated");
   },
   methods: {
+    onModalConfirm(e) {
+      this.modalData = {
+        show: false,
+        message: "",
+      };
+    },
     onResize() {
       if (this.$refs.unityContainer == null) {
         this.respWidth = 414;
@@ -144,6 +184,30 @@ export default {
       document.querySelector("#unity-canvas").style.height =
         this.respHeight + "px";
     },
+    setStep(state) {
+      console.log("set state to:" + state);
+      switch (state) {
+        case this.state.none:
+          break;
+        case this.state.titleLeaderboard:
+          this.leaderboardMode = "anony";
+          console.log("set anony");
+          break;
+        case this.state.regist:
+          break;
+        case this.state.userLeaderboard:
+          this.leaderboardMode = "focus";
+          console.log("set focus");
+          break;
+        case this.state.gameplay:
+          break;
+        case this.state.result:
+          this.leaderboardMode = "result";
+          console.log("set result");
+          break;
+      }
+      this.step = state;
+    },
     postMessageToParent(type, data) {
       const e = {
         key: type,
@@ -152,26 +216,93 @@ export default {
       window.parent.postMessage(e, "*");
       console.log("game post message:", e);
     },
-    onRegistComplete(userData){
-      console.log("regist complete:"+userData);
+    onRegistComplete(userData) {
+      console.log("regist complete:" + userData);
       this.userData = userData;
-      this.firebaseInstance.getTeam();
-      // this.step=this.state.userLeaderboard;
+      this.setStep(this.state.userLeaderboard);
+      this.firebaseInstance.addOnPlaytime(this.userData);
     },
-    onTitleLeaderboardComplete(e){
-      this.step=this.state.regist;
+    onTitleLeaderboardComplete(e) {
+      // this.step=this.state.regist;
+      this.setStep(this.state.regist);
       // this.onUserLeaderboardComplete();
     },
-    onUserLeaderboardComplete(e){
-      this.step=this.state.gameplay;
+    onUserLeaderboardComplete(e) {
+      // this.step=this.state.gameplay;
+      this.setStep(this.state.gameplay);
+        
       if (this.unityInstance != null)
-          this.unityInstance.SendMessage("Main Camera", "StartPlay");
+      {
+        if(this.userData.gameuid!='')
+        {
+          console.log("user play in bonus mode");
+          this.unityInstance.SendMessage("Main Camera", "PlayInBonusMode");
+        }
+        this.unityInstance.SendMessage("Main Camera", "StartPlay");
+      }
     },
-    onTeamUpdate(teamData)
-    {
+    onTeamUpdate(teamData) {
       this.teamData = teamData;
-      this.step=this.state.userLeaderboard;
-    }
+      console.log("---on team update all");
+      console.log(this.teamData);
+      console.log("--------");
+      if (this.step == this.state.regist)
+        this.setStep(this.state.userLeaderboard);
+      // this.step=this.state.userLeaderboard;
+    },
+    onTeamUpdateInUnit(team){
+      console.log("---on team update:"+team.key);
+      if(this.teamData!=null && this.teamData.hasOwnProperty(team.key))
+      {
+        this.teamData[team.key].score = team.data.score;
+        console.log('update '+team.key+' score to '+team.data.score);
+        this.$refs.leaderboard.buildTeamList(this.teamData);
+      }
+      else
+      {
+        this.teamData[team.key]=team.data;
+        console.log('regist '+team.key+' with data '+team.data.score);
+        this.$refs.leaderboard.buildTeamList(this.teamData);
+      }
+    },
+    onLeaderboardComplete(e) {
+      switch (this.step) {
+        case this.state.titleLeaderboard:
+          this.onTitleLeaderboardComplete();
+          break;
+        case this.state.userLeaderboard:
+          this.onUserLeaderboardComplete();
+          break;
+        case this.state.result:
+          console.log("on result leaderboard complete");
+          break;
+      }
+    },
+    onClickReturn(e) {
+      if (this.unityInstance != null)
+        this.unityInstance.SendMessage("Main Camera", "Return");
+      this.postMessageToParent("click-return", "200");
+    },
+    onClickDownloadApp(e) {
+      window.open("https://pubgm.tw/tigeryear");
+      this.postMessageToParent("download-app", "200");
+    },
+    onClickFacebookShare(e) {
+      FB.ui(
+        {
+          method: "share",
+          hashtag: "#吃手爭霸賽",
+          href: "https://pubgm-2022-firstquarter-event.com.tw/",
+        },
+        function (response) {}
+      );
+      this.postMessageToParent("fb-share", "200");
+      this.firebaseInstance.addBonusMaxPlaytime(this.userData);
+      this.modalData = {
+        show: true,
+        message: "獲得增益: 遊玩上限+3！",
+      };
+    },
   },
   computed: {
     userBirthdayYYYYMMDD: {
@@ -209,6 +340,15 @@ export default {
           useGrouping: false,
         }),
       ].join("-");
+    },
+    canShowLeaderboard() {
+      if (
+        this.step == this.state.titleLeaderboard ||
+        this.step == this.state.userLeaderboard ||
+        this.step == this.state.result
+      )
+        return true;
+      else return false;
     },
   },
 };

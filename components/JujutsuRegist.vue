@@ -45,6 +45,7 @@
         <div class="w-8/12 float-right flex flex-row">
           <input
             ref="emailField"
+            :disabled="step == state.existUser"
             class="w-full h-full p-1"
             type="text"
             id=""
@@ -55,11 +56,14 @@
       </div>
 
       <div
-        class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
+        class="relative w-[80%] ml-[10%] mt-[5%] mb-[5%]"
         v-if="step == state.existUser"
       >
         <p class="text-black w-full text-center text-xl">
           歡迎回來 {{ userData.username }}
+        </p>
+        <p class="text-black w-full text-center text-xl">
+          今日剩餘的遊玩次數: {{ userData.maxtime - userData.playtime }}
         </p>
       </div>
 
@@ -299,23 +303,35 @@ export default {
         message: "",
       };
     },
-    emailVerifyProceed(e) {
+    async emailVerifyProceed(e) {
       if (
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.inputEmail)
       ) {
         this.userData.emailaddress = this.inputEmail;
         // Check in firebase
-        let result = this.firebaseInstance.userExist(
-          this.userData.emailaddress
-        );
-        console.log(result);
+        let result = {};
+        let user = null;
+        await this.firebaseInstance
+          .userExist(this.userData.emailaddress)
+          .then(function (resp) {
+            console.log(resp);
+            result = resp;
+            user = resp.data;
+          });
+        if (user != null) {
+          this.userData = user;
+          const remainPlaytime = this.userData.maxtime - this.userData.playtime;
 
-        // Out of chance
-        if (false) {
-          this.modalData = {
-            show: true,
-            message: "本日可玩次數已用完，請明日再來",
-          };
+          console.log("go");
+
+          // Out of chance
+          if (remainPlaytime == 0) {
+            this.modalData = {
+              show: true,
+              message: "本日可玩次數已用完，請明日再來",
+            };
+            return;
+          }
         }
         // Pass
         // Check existing
@@ -335,61 +351,62 @@ export default {
         };
       }
     },
-    newOrExistUserProceed(e) {
+    async newOrExistUserProceed(e) {
       let pattern = /[`~!@#$%^&*()_+<>?:"{},.\/;'[\]]/im;
       let error = "";
       let isSocialGroup = this.userData.group != "學生組";
 
-      if (
-        this.userData.gameuid.length > 0 &&
-        (this.userData.gameuid.length < 5 || this.userData.gameuid.length > 12)
-      )
-        error += "遊戲UID必須介於5~12位數字之間";
-
-      if (this.userData.username == "") error += "\n請輸入姓名";
-      if (pattern.test(this.userData.username))
-        error += "\n姓名請勿包含特殊文字";
-
-      if (this.userData.group == "") error += "\n尚未選擇組別";
-
-      if (!isSocialGroup) {
+      if (this.step == this.state.newUser) {
         if (
-          this.$refs.cityField.selectedIndex == 0 ||
-          this.$refs.zoneField.selectedIndex == 0
+          this.userData.gameuid.length > 0 &&
+          (this.userData.gameuid.length < 5 ||
+            this.userData.gameuid.length > 12)
         )
-          error += "\n尚未選擇地區";
+          error += "遊戲UID必須介於5~12位數字之間";
 
-        if (this.$refs.schoolField.selectedIndex == 0)
-          error += "\n尚未選擇學校";
-      }
+        if (this.userData.username == "") error += "\n請輸入姓名";
+        if (pattern.test(this.userData.username))
+          error += "\n姓名請勿包含特殊文字";
 
-      if (error != "") {
-        this.modalData = {
-          show: true,
-          message: error,
-        };
-        return;
-      }
+        if (this.userData.group == "") error += "\n尚未選擇組別";
 
-        if(isSocialGroup)
-        {
-            this.userData.entity = {
-        city: '',
-        zone: '',
-        school: this.userData.group,
-      };
-        }
-        else
-        {
-      this.userData.entity = {
-        city: this.selectedCity,
-        zone: this.selectedZone,
-        school: this.selectedSchool,
-      };
+        if (!isSocialGroup) {
+          if (
+            this.$refs.cityField.selectedIndex == 0 ||
+            this.$refs.zoneField.selectedIndex == 0
+          )
+            error += "\n尚未選擇地區";
+
+          if (this.$refs.schoolField.selectedIndex == 0)
+            error += "\n尚未選擇學校";
         }
 
-      this.firebaseInstance.addUser(this.userData);
-      this.firebaseInstance.submitTeam(this.userData);
+        if (error != "") {
+          this.modalData = {
+            show: true,
+            message: error,
+          };
+          return;
+        }
+
+        if (isSocialGroup) {
+          this.userData.entity = {
+            city: "",
+            zone: "",
+            school: this.userData.group,
+          };
+        } else {
+          this.userData.entity = {
+            city: this.selectedCity,
+            zone: this.selectedZone,
+            school: this.selectedSchool,
+          };
+        }
+
+        console.log("Add user then submit team");
+        await this.firebaseInstance.addUser(this.userData);
+      }
+      await this.firebaseInstance.submitTeam(this.userData);
 
       this.step = this.step.complete;
       console.log(this.userData);
@@ -416,6 +433,25 @@ export default {
     show: function (newVal, oldVal) {
       this.isShow = newVal;
       console.log("show update");
+      if (this.isShow == false) {
+        this.step = 0;
+        this.userData = {
+          username: "",
+          gameuid: "",
+          emailaddress: "",
+          group: "",
+          datecreate: "",
+          lastplaytimestamp: 0,
+          lastplaydate: "",
+          playtime: 1,
+          maxtime: 3,
+          entity: {
+            city: "",
+            zone: "",
+            school: "",
+          },
+        };
+      }
     },
     firebase: function (newVal, oldVal) {
       this.firebaseInstance = this.firebase;

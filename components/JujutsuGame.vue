@@ -13,17 +13,17 @@
       </div>
     </div>
 
-    <div class="absolute w-full top-[calc(100%/12*4.8)] h-[calc(100%/12*1)]">
+    <div v-if="showResultBox" class="absolute w-full top-[calc(100%/12*4.8)] h-[calc(100%/12*1)]">
       <div
         class="relative w-[80%] ml-[10%] h-[100%] flex items-center justify-center"
       >
-        <p class="text-white text-3xl select-none">{{ userData.entity.city+userData.entity.school }}</p>
-        <!-- <p class="text-white text-2xl select-none">新北市市立桃子腳國中</p> -->
+        <p class="text-white text-3xl select-none">分數提升</p>
       </div>
       <div
-        class="relative w-[80%] ml-[10%] h-[140%] flex items-center justify-center"
+        class="relative w-[80%] ml-[10%] h-[140%] "
       >
-        <p class="text-white text-2xl select-none">{{ userTeamData.score + '->' + (userTeamData.score+gameResultData.score) }}</p>
+        <p class="flex items-center justify-center my-2 text-white text-2xl select-none">{{ userData.entity.city+userData.entity.school }}</p>
+        <p class="flex items-center justify-center my-3 text-white text-2xl select-none">{{ clampFromScore + '->' + userTeamData.score }}</p>
       </div>
     </div>
   </div>
@@ -49,7 +49,9 @@ export default {
       teamData: {},
       teamList: [],
       gameResultData:{},
-      userTeamData:{}
+      userTeamData:{},
+      showResultBox:false,
+      scoreOnStart:0,
     };
   },
   methods: {
@@ -59,11 +61,26 @@ export default {
       }
   },
   mounted() {},
-  computed: {},
+  computed: {
+    clampFromScore(){
+      return Math.max(this.userTeamData.score-this.gameResultData.score,0);
+    }
+  },
   watch: {
     show: function (newVal, oldVal) {
       this.isShow = newVal;
       console.log("show update");
+      if(this.isShow)
+      {
+        for(const i in this.team)
+        {
+            if(this.team[i].teamname==this.userData.entity.city+this.userData.entity.school)
+            {
+              this.scoreOnStart = this.team[i].score;
+                break;
+            }
+        }
+      }
     },
     data: function (newVal, oldVal) {
       console.log("on userdata update");
@@ -73,11 +90,9 @@ export default {
     },
     team: function (newVal, oldVal) {
       console.log("team update");
-      console.log(newVal);
       let arr = [];
       this.teamData = newVal;
       for (const key in newVal) {
-        console.log(newVal[key]);
         arr.push({
           teamname: newVal[key].teamname,
           score: newVal[key].score,
@@ -88,21 +103,25 @@ export default {
     },
     game:function(newVal,oldVal){
         console.log("game result update");
-        console.log(newVal);
-        this.gameResultData = newVal;
 
-        for(const i in this.teamList)
+        for(const i in this.team)
         {
-            console.log(this.teamList[i]);
-            if(this.teamList[i].teamname==this.userData.entity.city+this.userData.entity.school)
+            if(this.team[i].teamname==this.userData.entity.city+this.userData.entity.school)
             {
                 console.log("found user data");
-                this.userTeamData = this.teamList[i];
+                this.userTeamData = this.team[i];
                 break;
             }
         }
         console.log("done user team");
         console.log(this.userTeamData);
+        this.gameResultData = newVal;
+        
+
+        setTimeout(()=>
+        {
+            this.showResultBox=true;
+        },250);
     }
   },
 };

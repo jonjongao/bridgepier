@@ -44,6 +44,10 @@ export default {
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
   },
+  unmounted() {
+    const dbRef = ref(getDatabase());
+    dbRef.off();
+  },
   watch: {},
   methods: {
     async verifyUser(data) {
@@ -62,16 +66,19 @@ export default {
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
       if (snapshot.exists()) {
+        const data = snapshot.val();
         return {
           exist: true,
           result: true,
           message: "此電子郵件已被使用",
+          data: data,
         };
       } else {
         return {
           exist: false,
           result: true,
           message: "新的使用者",
+          data: null,
         };
       }
     },
@@ -79,26 +86,10 @@ export default {
       if (this.response.exist) this.updateUser(data);
       else this.addUser(data);
     },
-    async updateUser(data) {
-      let id = data.gameUid + "_" + data.userName + "_" + data.dateBirth;
-      if (data.gameUid != "none" || data.gameUid != null) id = data.gameUid;
-      const dbRef = ref(getDatabase());
-      const db = getDatabase();
-      const snapshot = await get(child(dbRef, `users/` + id));
-
-      if (snapshot.exists()) {
-        set(ref(db, "users/" + id + "/chim/" + this.now), {
-          servertime: serverTimestamp(),
-          date: data.luckData.date,
-          lvl: data.luckData.lvl,
-          lvlStr: data.luckData.lvlStr,
-          lunarYearLabel: data.luckData.lunarYearLabel,
-          monthDayLabel: data.luckData.monthDayLabel,
-          differ: data.luckData.differ,
-        });
-      }
-    },
     async addUser(data) {
+      console.log("-------add user");
+      console.log(data);
+      console.log("---------------");
       const unixtime = serverTimestamp();
       // const unixtime = Date.now();
       // RealtimeDB版本
@@ -133,9 +124,17 @@ export default {
           teamname: teamname,
           score: 0,
         });
+
+        onValue(ref(db, "teams/" + id), (snapshot) => {
+          const data = snapshot.val();
+          this.$emit("team-update-unit", {
+            key: snapshot.key,
+            data: snapshot.val(),
+          });
+        });
       }
     },
-    async updateTeam(userData,resultData) {
+    async updateTeam(userData, resultData) {
       const id =
         userData.group == "社會組"
           ? "社會組"
@@ -151,15 +150,39 @@ export default {
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       let oldScore = 0;
-      const snapshot = await get(child(dbRef, "teams/"+id));
+      const snapshot = await get(child(dbRef, "teams/" + id));
       if (snapshot.exists()) {
         oldScore = snapshot.val().score;
-      }
-      console.log("get old score:"+oldScore);
 
-      update(ref(db), {
-        ["teams/" + id+"/score"]: oldScore + resultData.score,
-      });
+        console.log("get old score:" + oldScore);
+
+        update(ref(db), {
+          ["teams/" + id + "/score"]: oldScore + resultData.score,
+        });
+      }
+    },
+    async addOnPlaytime(userData){
+      const id = userData.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      const snapshot = await get(child(dbRef, "users/" + id));
+      if (snapshot.exists()) {
+        const oldPlaytime = snapshot.val().playtime;
+        update(ref(db), {
+          ["users/" + id + "/playtime"]: oldPlaytime + 1,
+        });
+      }
+    },
+    async addBonusMaxPlaytime(userData){
+      const id = userData.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      const snapshot = await get(child(dbRef, "users/" + id));
+      if (snapshot.exists()) {
+        update(ref(db), {
+          ["users/" + id + "/maxtime"]: 6,
+        });
+      }
     },
     async getTeam() {
       console.log("try get team data");
@@ -168,25 +191,27 @@ export default {
       const snapshot = await get(child(dbRef, "teams"));
       if (snapshot.exists()) {
         const list = snapshot.val();
-        console.log("done fetch team data");
-        console.log(list);
         this.$emit("team-update", list);
+
+        setTimeout(() => {
+          // onValue(ref(db,"teams"),(snapshot)=>{
+          //   const data = snapshot.val();
+          //   console.log("team data refresh");
+          //   console.log(data);
+          // });
+          for (var key in list) {
+            console.log("try listen:" + key);
+            const teamRef = ref(db, "teams/" + key);
+            onValue(teamRef, (snapshot) => {
+              const data = snapshot.val();
+              this.$emit("team-update-unit", {
+                key: snapshot.key,
+                data: snapshot.val(),
+              });
+            });
+          }
+        }, 1000);
       }
-    },
-    encryptUserName(username) {
-      let en = "";
-      const replaceLength = username.length - 1 - 1;
-      if (replaceLength < 0) {
-      } else if (replaceLength == 0) {
-        en = username[0] + "*";
-      } else {
-        en = username[0];
-        for (var i = 0; i < replaceLength; i++) {
-          en += "*";
-        }
-        en += username[username.length - 1];
-      }
-      return en;
     },
   },
   computed: {
