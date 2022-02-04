@@ -245,7 +245,7 @@ export default {
         datecreate: "",
         lastplaytimestamp: 0,
         lastplaydate: "",
-        playtime: 1,
+        playtime: 0,
         maxtime: 3,
         entity: {
           city: "",
@@ -256,6 +256,7 @@ export default {
       teamData: {
         teamname: "",
         score: 0,
+        member:{},
       },
     };
   },
@@ -311,18 +312,28 @@ export default {
         // Check in firebase
         let result = {};
         let user = null;
+        let isNewDay = false;
         await this.firebaseInstance
           .userExist(this.userData.emailaddress)
           .then(function (resp) {
             console.log(resp);
             result = resp;
             user = resp.data;
+            isNewDay = resp.diffDays>=1;
           });
         if (user != null) {
           this.userData = user;
           const remainPlaytime = this.userData.maxtime - this.userData.playtime;
 
           console.log("go");
+
+          // Has reset playtime
+          if (isNewDay){
+            this.modalData = {
+              show: true,
+              message: "新的一天，遊玩次數已重新計算！分享貼文可再次獲得增益",
+            };
+          }
 
           // Out of chance
           if (remainPlaytime == 0) {

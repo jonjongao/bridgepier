@@ -81,6 +81,10 @@ export default {
             }
         }
       }
+      else
+      {
+        this.showResultBox=false;
+      }
     },
     data: function (newVal, oldVal) {
       console.log("on userdata update");

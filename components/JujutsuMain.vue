@@ -233,7 +233,12 @@ export default {
         
       if (this.unityInstance != null)
       {
-        if(this.userData.gameuid!='')
+        if(this.userData.gameuid=='')
+        {
+          console.log("user play in normal mode");
+          this.unityInstance.SendMessage("Main Camera", "PlayInNormalMode");
+        }
+        else
         {
           console.log("user play in bonus mode");
           this.unityInstance.SendMessage("Main Camera", "PlayInBonusMode");
@@ -252,14 +257,18 @@ export default {
     },
     onTeamUpdateInUnit(team){
       console.log("---on team update:"+team.key);
+      //如果當前teamData已有該隊伍的key
       if(this.teamData!=null && this.teamData.hasOwnProperty(team.key))
       {
         this.teamData[team.key].score = team.data.score;
         console.log('update '+team.key+' score to '+team.data.score);
         this.$refs.leaderboard.buildTeamList(this.teamData);
       }
+      //如果是新隊伍
       else
       {
+        if(this.teamData==null)
+          this.teamData={};
         this.teamData[team.key]=team.data;
         console.log('regist '+team.key+' with data '+team.data.score);
         this.$refs.leaderboard.buildTeamList(this.teamData);

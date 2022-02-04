@@ -66,12 +66,28 @@ export default {
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
       if (snapshot.exists()) {
-        const data = snapshot.val();
+        // const timeStamp = new Date().getTime();
+        // const yesterdayTimeStamp = timeStamp - 24 * 60 * 60 * 1000;
+        // const yesterdayDate = new Date(yesterdayTimeStamp);
+
+        let data = snapshot.val();
+        let date1 = new Date(0);
+        date1.setUTCMilliseconds(data.lastplaytimestamp);
+        let date2 = new Date();
+        const diffInDays = date2.getDate() - date1.getDate();
+
+        if (diffInDays >= 1) {
+          await this.resetPlaytime(data);
+          data.playtime = 0;
+          data.maxtime = 3;
+        }
+
         return {
           exist: true,
           result: true,
           message: "此電子郵件已被使用",
           data: data,
+          diffDays: diffInDays,
         };
       } else {
         return {
@@ -79,6 +95,7 @@ export default {
           result: true,
           message: "新的使用者",
           data: null,
+          diffDays: 0,
         };
       }
     },
@@ -94,7 +111,7 @@ export default {
       // const unixtime = Date.now();
       // RealtimeDB版本
       const db = getDatabase();
-      const id = data.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+      const id = this.getUserID(data);
 
       data.datecreate = unixtime;
       data.lastplaytimestamp = unixtime;
@@ -103,18 +120,9 @@ export default {
       await set(ref(db, "users/" + id), data);
     },
     async submitTeam(data) {
-      const id =
-        data.group == "社會組"
-          ? "社會組"
-          : data.entity.city +
-            "-" +
-            data.entity.zone +
-            "-" +
-            data.entity.school;
-      const teamname =
-        data.group == "社會組"
-          ? "社會組"
-          : data.entity.city + data.entity.school;
+      const userID = this.getUserID(data);
+      const id = this.getTeamID(data);
+      const teamname = this.getTeamName(data);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "teams/" + id));
@@ -123,6 +131,9 @@ export default {
         await set(ref(db, "teams/" + id), {
           teamname: teamname,
           score: 0,
+          member: {
+            [userID]: 0,
+          },
         });
 
         onValue(ref(db, "teams/" + id), (snapshot) => {
@@ -135,34 +146,84 @@ export default {
       }
     },
     async updateTeam(userData, resultData) {
-      const id =
-        userData.group == "社會組"
-          ? "社會組"
-          : userData.entity.city +
-            "-" +
-            userData.entity.zone +
-            "-" +
-            userData.entity.school;
-      const teamname =
-        userData.group == "社會組"
-          ? "社會組"
-          : userData.entity.city + userData.entity.school;
       const dbRef = ref(getDatabase());
       const db = getDatabase();
+
+      const userID = this.getUserID(userData);
+      const todayHistoryPath = "users/" + userID + "/history/" + this.now;
+      const historyNode = await get(child(dbRef, todayHistoryPath));
+      let liveHighscore = 0;
+      if (historyNode.exists()) {
+        console.log("update highscore");
+        if (resultData.score > historyNode.val().highscore) {
+          liveHighscore = resultData.score;
+          update(ref(db), {
+            [todayHistoryPath + "/highscore"]: resultData.score,
+          });
+        } else liveHighscore = historyNode.val().highscore;
+      } else {
+        console.log("add hightscore");
+        set(ref(db, todayHistoryPath), {
+          highscore: resultData.score,
+        });
+        liveHighscore = resultData.score;
+      }
+
+      const teamID = this.getTeamID(userData);
+      const teamname = this.getTeamName(userData);
+
       let oldScore = 0;
-      const snapshot = await get(child(dbRef, "teams/" + id));
-      if (snapshot.exists()) {
-        oldScore = snapshot.val().score;
-
-        console.log("get old score:" + oldScore);
-
+      const teamPath = "teams/" + teamID;
+      const memberPath = "teams/" + teamID + "/member/" + userID;
+      const memberNode = await get(child(dbRef, memberPath));
+      if (memberNode.exists()) {
         update(ref(db), {
-          ["teams/" + id + "/score"]: oldScore + resultData.score,
+          [memberPath]: liveHighscore,
+        });
+
+        // oldScore = memberNode.val().score;
+
+        // console.log("get old score:" + oldScore);
+
+        // update(ref(db), {
+        //   ["teams/" + teamID + "/score"]: oldScore + resultData.score,
+        // });
+      } else {
+        set(ref(db, memberPath), liveHighscore);
+      }
+
+      const allMemberPath = "teams/" + teamID + "/member";
+      const allMemberNode = await get(child(dbRef, allMemberPath));
+      if (allMemberNode.exists()) {
+        const data = allMemberNode.val();
+        console.log("-----all member");
+        console.log(data);
+        console.log("---------------");
+        let scoreSum = 0;
+        for (var key in data) {
+          scoreSum += data[key];
+        }
+        update(ref(db), {
+          ["teams/" + teamID + "/score"]: scoreSum,
+        });
+      } else {
+        // set(ref(db,"teams/"+teamID+"/score"),0);
+      }
+    },
+    async resetPlaytime(userData) {
+      const id = this.getUserID(userData);
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      const snapshot = await get(child(dbRef, "users/" + id));
+      if (snapshot.exists()) {
+        await update(ref(db), {
+          ["users/" + id + "/playtime"]: 0,
+          ["users/" + id + "/maxtime"]: 3,
         });
       }
     },
-    async addOnPlaytime(userData){
-      const id = userData.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+    async addOnPlaytime(userData) {
+      const id = this.getUserID(userData);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
@@ -170,11 +231,13 @@ export default {
         const oldPlaytime = snapshot.val().playtime;
         update(ref(db), {
           ["users/" + id + "/playtime"]: oldPlaytime + 1,
+          ["users/" + id + "/lastplaydate"]: this.now,
+          ["users/" + id + "/lastplaytimestamp"]: serverTimestamp(),
         });
       }
     },
-    async addBonusMaxPlaytime(userData){
-      const id = userData.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+    async addBonusMaxPlaytime(userData) {
+      const id = this.getUserID(userData);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
@@ -213,18 +276,51 @@ export default {
         }, 1000);
       }
     },
+    getTeamID(userData) {
+      return userData.group == "社會組"
+        ? "社會組"
+        : userData.entity.city +
+            "-" +
+            userData.entity.zone +
+            "-" +
+            userData.entity.school;
+    },
+    getTeamName(userData) {
+      return userData.group == "社會組"
+        ? "社會組"
+        : userData.entity.city + userData.entity.school;
+    },
+    getUserID(userData) {
+      return userData.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+    },
   },
   computed: {
     now() {
       const d = new Date();
       const mm = d.getMonth() + 1; // getMonth() is zero-based
       const dd = d.getDate();
-      d.getHours();
-      d.getMinutes();
-      d.getSeconds();
 
       return [
         d.getFullYear(),
+        mm.toLocaleString("zh-TW", {
+          minimumIntegerDigits: 2,
+          useGrouping: false,
+        }),
+        dd.toLocaleString("zh-TW", {
+          minimumIntegerDigits: 2,
+          useGrouping: false,
+        }),
+      ].join("-");
+    },
+    yestday() {
+      const timeStamp = new Date().getTime();
+      const yesterdayTimeStamp = timeStamp - 24 * 60 * 60 * 1000;
+      const yesterdayDate = new Date(yesterdayTimeStamp);
+      const mm = yesterdayDate.getMonth() + 1; // getMonth() is zero-based
+      const dd = yesterdayDate.getDate();
+
+      return [
+        yesterdayDate.getFullYear(),
         mm.toLocaleString("zh-TW", {
           minimumIntegerDigits: 2,
           useGrouping: false,
