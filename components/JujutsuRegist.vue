@@ -12,7 +12,9 @@
       v-if="step == state.emailVerify"
     >
       <div class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]">
-        <p class="text-black w-4/12 float-left">電子郵件</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
+          電子郵件
+        </p>
         <div class="w-8/12 float-right">
           <input
             class="w-full h-full p-1"
@@ -41,7 +43,9 @@
       v-if="step == state.newUser || step == state.existUser"
     >
       <div class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]">
-        <p class="text-black w-4/12 float-left">電子郵件</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
+          電子郵件
+        </p>
         <div class="w-8/12 float-right flex flex-row">
           <input
             ref="emailField"
@@ -51,6 +55,26 @@
             id=""
             placeholder="輸入電子郵件"
             @input="inputEmail = $event.target.value"
+          />
+        </div>
+      </div>
+
+      <div
+        class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
+        v-if="userExistingRespond.hasUid == false"
+      >
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">UID</p>
+        <div class="w-8/12 float-right flex flex-row">
+          <input
+            class="w-full h-full p-1"
+            type="text"
+            minlength="5"
+            maxlength="12"
+            pattern="[0-9]*"
+            inputmode="numeric"
+            id=""
+            placeholder="輸入《絕地求生M》UID"
+            @input="userData.gameuid = $event.target.value"
           />
         </div>
       </div>
@@ -71,23 +95,7 @@
         class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
         v-if="step == state.newUser"
       >
-        <p class="text-black w-4/12 float-left">UID</p>
-        <div class="w-8/12 float-right flex flex-row">
-          <input
-            class="w-full h-full p-1"
-            type="text"
-            id=""
-            placeholder="輸入《絕地求生M》UID"
-            @input="userData.gameuid = $event.target.value"
-          />
-        </div>
-      </div>
-
-      <div
-        class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
-        v-if="step == state.newUser"
-      >
-        <p class="text-black w-4/12 float-left">姓名</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">姓名</p>
         <div class="w-8/12 float-right flex flex-row">
           <input
             class="w-full h-full p-1"
@@ -103,7 +111,9 @@
         class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
         v-if="step == state.newUser"
       >
-        <p class="text-black w-4/12 float-left">選擇組別</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
+          選擇組別
+        </p>
         <div class="w-8/12 float-right">
           <div
             class="w-full inline-flex shadow-md hover:shadow-lg focus:shadow-lg"
@@ -139,7 +149,7 @@
         class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
         v-if="step == state.newUser && this.userData.group == '學生組'"
       >
-        <p class="text-black w-4/12 float-left">選擇地區</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">選擇地區</p>
         <div class="w-8/12 float-right flex flex-row">
           <select
             ref="cityField"
@@ -168,7 +178,7 @@
         class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
         v-if="step == state.newUser && this.userData.group == '學生組'"
       >
-        <p class="text-black w-4/12 float-left">選擇學校</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">選擇學校</p>
         <div class="w-8/12 float-right flex flex-row">
           <select
             ref="schoolField"
@@ -229,6 +239,7 @@ export default {
       modalData: {
         show: false,
         message: "",
+        callback: null,
       },
       state: {
         emailVerify: 0,
@@ -256,7 +267,11 @@ export default {
       teamData: {
         teamname: "",
         score: 0,
-        member:{},
+        member: {},
+      },
+      userExistingRespond: {
+        isNewDay: false,
+        hasUid: false,
       },
     };
   },
@@ -299,40 +314,54 @@ export default {
   },
   methods: {
     onModalConfirm(e) {
+      if (this.modalData.callback != null) this.modalData.callback();
       this.modalData = {
         show: false,
         message: "",
+        callback: null,
       };
     },
     async emailVerifyProceed(e) {
       if (
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.inputEmail)
       ) {
+        this.userExistingRespond = {
+          isNewDay: false,
+          hasUid: false,
+        };
         this.userData.emailaddress = this.inputEmail;
         // Check in firebase
         let result = {};
         let user = null;
         let isNewDay = false;
+        let hasUid = false;
         await this.firebaseInstance
           .userExist(this.userData.emailaddress)
           .then(function (resp) {
             console.log(resp);
             result = resp;
             user = resp.data;
-            isNewDay = resp.diffDays>=1;
+            isNewDay = resp.diffDays >= 1;
+            hasUid = (resp.data==null ? false : resp.data.gameuid != "");
           });
+        //TODO: 後台已有該用戶資料
         if (user != null) {
           this.userData = user;
+          this.userExistingRespond = {
+            isNewDay: isNewDay,
+            hasUid: hasUid,
+          };
           const remainPlaytime = this.userData.maxtime - this.userData.playtime;
 
           console.log("go");
 
           // Has reset playtime
-          if (isNewDay){
+          if (isNewDay) {
             this.modalData = {
               show: true,
               message: "新的一天，遊玩次數已重新計算！分享貼文可再次獲得增益",
             };
+            this.$post2parent.message({key:'on-renew-playtime',value:200})
           }
 
           // Out of chance
@@ -416,8 +445,27 @@ export default {
 
         console.log("Add user then submit team");
         await this.firebaseInstance.addUser(this.userData);
+      } else {
       }
       await this.firebaseInstance.submitTeam(this.userData);
+
+      //TODO: 如果檢查時用戶沒有uid，但是申請時有填uid的話
+      if (
+        this.userExistingRespond.hasUid == false &&
+        this.userData.gameuid != ""
+      ) {
+        await this.firebaseInstance.updateUserUID(this.userData);
+        this.$post2parent.message({key:'on-submit-uid',value:200})
+        this.modalData = {
+          show: true,
+          message: "獲得增益: 分數加倍！",
+          callback: () => {
+            this.step = this.step.complete;
+            this.$emit("complete", this.userData);
+          },
+        };
+        return;
+      }
 
       this.step = this.step.complete;
       console.log(this.userData);

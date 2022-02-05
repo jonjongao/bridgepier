@@ -118,6 +118,8 @@ export default {
       data.lastplaydate = this.now;
 
       await set(ref(db, "users/" + id), data);
+
+      this.$post2parent.message({key:'new-user',value:id})
     },
     async submitTeam(data) {
       const userID = this.getUserID(data);
@@ -135,6 +137,8 @@ export default {
             [userID]: 0,
           },
         });
+
+        this.$post2parent.message({key:'new-team',value:id})
 
         onValue(ref(db, "teams/" + id), (snapshot) => {
           const data = snapshot.val();
@@ -233,6 +237,17 @@ export default {
           ["users/" + id + "/playtime"]: oldPlaytime + 1,
           ["users/" + id + "/lastplaydate"]: this.now,
           ["users/" + id + "/lastplaytimestamp"]: serverTimestamp(),
+        });
+      }
+    },
+    async updateUserUID(userData) {
+      const id = this.getUserID(userData);
+      const dbRef = ref(getDatabase());
+      const db = getDatabase();
+      const snapshot = await get(child(dbRef, "users/" + id));
+      if (snapshot.exists()) {
+        update(ref(db), {
+          ["users/" + id + "/gameuid"]: userData.gameuid,
         });
       }
     },

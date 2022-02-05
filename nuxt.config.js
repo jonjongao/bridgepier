@@ -4,7 +4,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'PUBGM《咒術迴戰》連動遊戲',
+    title: '三級盔先生吃起來',
     htmlAttrs: {
       lang: 'zh'
     },
@@ -31,6 +31,7 @@ export default {
   plugins: [
     // { src: '~/plugins/vue-flickity', ssr: false },
     { src: '@/plugins/facebook.js', ssr: false },
+    { src: '@/plugins/post2parent.js', ssr: false },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

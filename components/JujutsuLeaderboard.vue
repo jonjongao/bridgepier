@@ -8,7 +8,9 @@
     </div>
     <div :class="teamContainerNormalMode">
       <div :class="teamFormNormalMode">
-        <p class="text-black w-4/12 float-left">選擇組別</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
+          選擇組別
+        </p>
         <div class="w-8/12 float-right">
           <div
             class="w-full inline-flex shadow-md hover:shadow-lg focus:shadow-lg"
@@ -41,7 +43,9 @@
       </div>
 
       <div :class="teamFormNormalMode">
-        <p class="text-black w-4/12 float-left">搜尋學校名稱</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
+          搜尋學校名稱
+        </p>
         <div class="w-8/12 float-right flex flex-row">
           <input
             :disabled="userData.group != '學生組'"
@@ -64,31 +68,38 @@
           <div :class="isUserTeam(t) ? teamFocusClass : teamNormalClass">
             <div class="flex flex-row">
               <img
+                class="object-contain"
                 v-if="index == 0"
                 src="~/assets/icons8-1st-place-medal-48.png"
                 width="24px"
                 height="24px"
               />
               <img
+                class="object-contain"
                 v-if="index == 1"
                 src="~/assets/icons8-2nd-place-medal-48.png"
                 width="24px"
                 height="24px"
               />
               <img
+                class="object-contain"
                 v-if="index == 2"
                 src="~/assets/icons8-3rd-place-medal-48.png"
                 width="24px"
                 height="24px"
               />
               <div v-if="index > 2" style="width: 24px" />
-              <p class="pr-1 text-sm self-center text-white">
-                {{ "#" + index }}
+              <p class="pr-1 self-center text-white text-xs mobile:text-sm">
+                {{ "#" + (index + 1) }}
               </p>
-              <p class="text-sm self-center text-white">{{ t.teamname }}</p>
+              <p class="self-center text-white text-xs mobile:text-sm">
+                {{ t.teamname }}
+              </p>
             </div>
-            <div>
-              <p class="text-white">{{ t.score }}</p>
+            <div class="flex">
+              <p class="text-white self-center text-xs mobile:text-sm">
+                {{ t.score }}
+              </p>
             </div>
           </div>
         </div>
@@ -145,20 +156,7 @@ export default {
         "mb-1": true,
         "justify-between": true,
         rounded: true,
-      },
-      teamActiveClass: {
-        flex: true,
-        "flex-row": true,
-        "bg-gray-800/20": true,
-        "p-2": true,
-        "mb-1": true,
-        "justify-between": true,
-        rounded: true,
-        transition: true,
-        "duration-150": true,
-        "scale-105": true,
-        "ease-in-out": true,
-        "delay-150": true,
+        "max-h-[40px]": true,
       },
       teamFocusClass: {
         flex: true,
@@ -169,6 +167,7 @@ export default {
         "justify-between": true,
         rounded: true,
         "focus-team": true,
+        "max-h-[40px]": true,
       },
       teamListNormalMode: {
         "bg-gray-800/20": true,
@@ -256,8 +255,8 @@ export default {
       });
     },
     buildTeamList(teamData) {
-      console.log("team update");
-      console.log(teamData);
+      // console.log("team update");
+      // console.log(teamData);
       //隊伍清單更新
       let arr = [];
       this.teamData = teamData;
@@ -272,11 +271,14 @@ export default {
         return b.score - a.score;
       });
       this.teamList = arr;
-      console.log("current mode:" + this.mode);
-      console.log("current show:" + this.isShow);
-      if (this.mode != "anony") {
-        this.scrollToUserTeam(".focus-team");
-      }
+      // console.log("current mode:" + this.mode);
+      // console.log("current show:" + this.isShow);
+
+      this.$nextTick(() => {
+        if (this.mode != "anony") {
+          this.scrollToUserTeam(".focus-team");
+        }
+      });
     },
   },
   mounted() {},
@@ -315,7 +317,7 @@ export default {
 
       switch (newVal) {
         case "anony":
-          this.title = "TOP20排行榜";
+          this.title = "排行榜";
           this.proceedBtnLabel = "參加比賽";
           break;
         default:
