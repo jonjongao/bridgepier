@@ -19,7 +19,7 @@
     </div>
 
     <!-- <Checker /> -->
-
+    <div class="absolute w-full h-full top-0" v-if="step!=state.gameplay"/>
     <Firebase
       ref="firebase"
       @team-update="onTeamUpdate"
@@ -326,7 +326,7 @@ export default {
       FB.ui(
         {
           method: "share",
-          hashtag: "#吃手爭霸賽",
+          hashtag: "#絕地盃宿儺手指校際賽",
           href: "https://pubgm-2022-firstquarter-event.com.tw/",
         },
         function (response) {}

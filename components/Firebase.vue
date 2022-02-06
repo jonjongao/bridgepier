@@ -59,7 +59,7 @@ export default {
       }
     },
     async userExist(email) {
-      let id = email.replace("@", "-at-").replace(".", "-dot-");
+      let id = this.getUserID(email);
       console.log(id);
 
       const dbRef = ref(getDatabase());
@@ -111,7 +111,7 @@ export default {
       // const unixtime = Date.now();
       // RealtimeDB版本
       const db = getDatabase();
-      const id = this.getUserID(data);
+      const id = this.getUserID(data.emailaddress);
 
       data.datecreate = unixtime;
       data.lastplaytimestamp = unixtime;
@@ -122,7 +122,7 @@ export default {
       this.$post2parent.message({key:'new-user',value:id})
     },
     async submitTeam(data) {
-      const userID = this.getUserID(data);
+      const userID = this.getUserID(data.emailaddress);
       const id = this.getTeamID(data);
       const teamname = this.getTeamName(data);
       const dbRef = ref(getDatabase());
@@ -153,7 +153,7 @@ export default {
       const dbRef = ref(getDatabase());
       const db = getDatabase();
 
-      const userID = this.getUserID(userData);
+      const userID = this.getUserID(userData.emailaddress);
       const todayHistoryPath = "users/" + userID + "/history/" + this.now;
       const historyNode = await get(child(dbRef, todayHistoryPath));
       let liveHighscore = 0;
@@ -215,7 +215,7 @@ export default {
       }
     },
     async resetPlaytime(userData) {
-      const id = this.getUserID(userData);
+      const id = this.getUserID(userData.emailaddress);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
@@ -227,7 +227,7 @@ export default {
       }
     },
     async addOnPlaytime(userData) {
-      const id = this.getUserID(userData);
+      const id = this.getUserID(userData.emailaddress);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
@@ -241,7 +241,7 @@ export default {
       }
     },
     async updateUserUID(userData) {
-      const id = this.getUserID(userData);
+      const id = this.getUserID(userData.emailaddress);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
@@ -252,7 +252,7 @@ export default {
       }
     },
     async addBonusMaxPlaytime(userData) {
-      const id = this.getUserID(userData);
+      const id = this.getUserID(userData.emailaddress);
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "users/" + id));
@@ -305,8 +305,8 @@ export default {
         ? "社會組"
         : userData.entity.city + userData.entity.school;
     },
-    getUserID(userData) {
-      return userData.emailaddress.replace("@", "-at-").replace(".", "-dot-");
+    getUserID(emailaddress) {
+      return emailaddress.replaceAll("@", "-at-").replaceAll(".", "-dot-");
     },
   },
   computed: {

@@ -1,5 +1,8 @@
 <template>
   <div v-if="isShow">
+    <div class="absolute w-full top-0 h-[calc(100%/12*9.5)]">
+      
+    </div>
     <div class="absolute w-full top-[calc(100%/12*1.2)] h-[calc(100%/12*1)]">
       <div
         class="relative w-[65%] ml-[18%] h-[100%] flex items-center justify-center"
@@ -16,9 +19,7 @@
       </div>
     </div>
 
-    <div class="absolute w-full top-[calc(100%/12*3)] h-[calc(100%/12*6.5)]">
-      
-    </div>
+    
 
     <div v-if="showResultBox" class="absolute w-full top-[calc(100%/12*4.8)] h-[calc(100%/12*1)]">
       <div
