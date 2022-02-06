@@ -7,15 +7,16 @@
       <div
         class="relative w-[65%] ml-[18%] h-[100%] flex items-center justify-center"
       >
-        <!-- <p class="text-white text-3xl select-none">分數</p> -->
         <p class="w-[55%] text-white text-center select-none text-2xl mobile:text-3xl">分數</p>
-        <p class="w-[45%] text-white text-center select-none text-2xl mobile:text-3xl">{{ gameUpdate.score }}</p>
+        <p class="w-[45%] text-white text-center select-none text-2xl mobile:text-3xl"></p>
+        <!-- <p class="w-[45%] text-white text-center select-none text-2xl mobile:text-3xl">{{ gameUpdate.score }}</p> -->
       </div>
       <div
         class="relative w-[65%] ml-[18%] h-[50%] mt-[3%] flex items-center justify-center"
       >
         <p class="w-[55%] text-white text-center select-none text-lg mobile:text-xl">吃手數</p>
-        <p class="w-[45%] text-white text-center select-none text-lg mobile:text-xl">{{ gameUpdate.feeded }}</p>
+        <p class="w-[45%] text-white text-center select-none text-lg mobile:text-xl"></p>
+        <!-- <p class="w-[45%] text-white text-center select-none text-lg mobile:text-xl">{{ gameUpdate.feeded }}</p> -->
       </div>
     </div>
 

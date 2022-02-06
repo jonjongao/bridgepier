@@ -122,11 +122,6 @@ export default {
           break;
         case "game-update":
           if (j["data"] == "") return;
-          // const data = JSON.parse(j["data"]);
-          // const numFeededFinger = data["feeded"];
-          // const numKill = data["killed"];
-          // const lvl = data["lvl"];
-          // const score = data["score"];
           this.gameUpdateData = this.parseGameData(j["data"]);
 
           break;
