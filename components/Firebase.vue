@@ -60,7 +60,7 @@ export default {
     },
     async userExist(email) {
       let id = this.getUserID(email);
-      console.log(id);
+      // console.log(id);
 
       const dbRef = ref(getDatabase());
       const db = getDatabase();
@@ -104,9 +104,9 @@ export default {
       else this.addUser(data);
     },
     async addUser(data) {
-      console.log("-------add user");
-      console.log(data);
-      console.log("---------------");
+      // console.log("-------add user");
+      // console.log(data);
+      // console.log("---------------");
       const unixtime = serverTimestamp();
       // const unixtime = Date.now();
       // RealtimeDB版本
@@ -158,7 +158,7 @@ export default {
       const historyNode = await get(child(dbRef, todayHistoryPath));
       let liveHighscore = 0;
       if (historyNode.exists()) {
-        console.log("update highscore");
+        // console.log("update highscore");
         if (resultData.score > historyNode.val().highscore) {
           liveHighscore = resultData.score;
           update(ref(db), {
@@ -166,7 +166,7 @@ export default {
           });
         } else liveHighscore = historyNode.val().highscore;
       } else {
-        console.log("add hightscore");
+        // console.log("add hightscore");
         set(ref(db, todayHistoryPath), {
           highscore: resultData.score,
         });
@@ -200,9 +200,9 @@ export default {
       const allMemberNode = await get(child(dbRef, allMemberPath));
       if (allMemberNode.exists()) {
         const data = allMemberNode.val();
-        console.log("-----all member");
-        console.log(data);
-        console.log("---------------");
+        // console.log("-----all member");
+        // console.log(data);
+        // console.log("---------------");
         let scoreSum = 0;
         for (var key in data) {
           scoreSum += data[key];
@@ -263,7 +263,7 @@ export default {
       }
     },
     async getTeam() {
-      console.log("try get team data");
+      // console.log("try get team data");
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "teams"));
@@ -278,7 +278,7 @@ export default {
           //   console.log(data);
           // });
           for (var key in list) {
-            console.log("try listen:" + key);
+            // console.log("try listen:" + key);
             const teamRef = ref(db, "teams/" + key);
             onValue(teamRef, (snapshot) => {
               const data = snapshot.val();

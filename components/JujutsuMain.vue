@@ -68,6 +68,8 @@ export default {
       modalData: {
         show: false,
         message: "",
+        class: "",
+        callback: null,
       },
       unityInstance: null,
       firebaseInstance: null,
@@ -191,9 +193,11 @@ export default {
       };
     },
     onModalConfirm(e) {
+      if (this.modalData.callback != null) this.modalData.callback();
       this.modalData = {
         show: false,
         message: "",
+        callback: null,
       };
     },
     onResize() {
@@ -211,7 +215,7 @@ export default {
         this.respHeight + "px";
     },
     setStep(state) {
-      console.log("set state to:" + state);
+      // console.log("set state to:" + state);
       switch (state) {
         case this.state.none:
           break;
@@ -223,7 +227,7 @@ export default {
             lvl: 1,
             score: 0,
           };
-          console.log("set anony");
+          // console.log("set anony");
           this.$post2parent.message({key:'on-mainmenu',value:200});
           break;
         case this.state.regist:
@@ -231,21 +235,21 @@ export default {
           break;
         case this.state.userLeaderboard:
           this.leaderboardMode = "focus";
-          console.log("set focus");
+          // console.log("set focus");
           break;
         case this.state.gameplay:
           this.$post2parent.message({key:'on-startplay',value:200})
           break;
         case this.state.result:
           this.leaderboardMode = "result";
-          console.log("set result");
+          // console.log("set result");
           this.$post2parent.message({key:'on-result',value:200})
           break;
       }
       this.step = state;
     },
     onRegistComplete(userData) {
-      console.log("regist complete:" + userData);
+      // console.log("regist complete:" + userData);
       this.userData = userData;
       this.setStep(this.state.userLeaderboard);
       this.firebaseInstance.addOnPlaytime(this.userData);
@@ -259,12 +263,21 @@ export default {
       // this.step=this.state.gameplay;
       this.setStep(this.state.gameplay);
 
+      this.modalData = {
+          show: true,
+          message: "點擊宿儺手指\n提升三級盔先生武器\n下方量條集滿後\n攻擊武器會升等\n同時增加攻擊傷害\n挑戰限時內擊敗更多敵人\n提升校際積分！\n\n點擊確認後立即開始遊戲",
+          class: "text-base",
+          callback: ()=>{
+            this.unityInstance.SendMessage("Main Camera", "WaitAndStart");
+          },
+        };
+
       if (this.unityInstance != null) {
         if (this.userData.gameuid == "") {
-          console.log("user play in normal mode");
+          // console.log("user play in normal mode");
           this.unityInstance.SendMessage("Main Camera", "PlayInNormalMode");
         } else {
-          console.log("user play in bonus mode");
+          // console.log("user play in bonus mode");
           this.unityInstance.SendMessage("Main Camera", "PlayInBonusMode");
         }
         this.unityInstance.SendMessage("Main Camera", "StartPlay");
@@ -272,9 +285,9 @@ export default {
     },
     onTeamUpdate(teamData) {
       this.teamData = teamData;
-      console.log("---on team update all");
-      console.log(this.teamData);
-      console.log("--------");
+      // console.log("---on team update all");
+      // console.log(this.teamData);
+      // console.log("--------");
       if (this.step == this.state.regist)
         this.setStep(this.state.userLeaderboard);
       // this.step=this.state.userLeaderboard;
@@ -329,7 +342,7 @@ export default {
       this.$post2parent.message({key:'fb-share',value:200})
 
       if (this.userData.maxtime == 6) {
-        console.log("already boost maxplaytime");
+        // console.log("already boost maxplaytime");
         this.modalData = {
           show: true,
           message: "已領過今日的分享增益，請明日再回來分享以獲得增益",

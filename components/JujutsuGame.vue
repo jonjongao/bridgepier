@@ -80,7 +80,7 @@ export default {
   watch: {
     show: function (newVal, oldVal) {
       this.isShow = newVal;
-      console.log("show update");
+      // console.log("show update");
       if(this.isShow)
       {
         for(const i in this.team)
@@ -98,13 +98,13 @@ export default {
       }
     },
     data: function (newVal, oldVal) {
-      console.log("on userdata update");
-      console.log(newVal);
+      // console.log("on userdata update");
+      // console.log(newVal);
       this.userData = newVal;
-      console.log(this.userData);
+      // console.log(this.userData);
     },
     team: function (newVal, oldVal) {
-      console.log("team update");
+      // console.log("team update");
       let arr = [];
       this.teamData = newVal;
       for (const key in newVal) {
@@ -114,22 +114,22 @@ export default {
         });
       }
       this.teamList = arr;
-      console.log(this.teamList);
+      // console.log(this.teamList);
     },
     game:function(newVal,oldVal){
-        console.log("game result update");
+        // console.log("game result update");
 
         for(const i in this.team)
         {
             if(this.team[i].teamname==this.userData.entity.city+this.userData.entity.school)
             {
-                console.log("found user data");
+                // console.log("found user data");
                 this.userTeamData = this.team[i];
                 break;
             }
         }
-        console.log("done user team");
-        console.log(this.userTeamData);
+        // console.log("done user team");
+        // console.log(this.userTeamData);
         this.gameResultData = newVal;
         
 

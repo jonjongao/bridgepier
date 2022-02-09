@@ -8,14 +8,9 @@
     </div>
     <div :class="teamContainerNormalMode">
       <div :class="teamFormNormalMode">
-        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
-          選擇組別
-        </p>
-        <div class="w-8/12 float-right">
-          <div
-            class="w-full inline-flex shadow-md hover:shadow-lg focus:shadow-lg"
-            role="group"
-          >
+        <p class="text-black w-5/12 float-left text-xs mobile:text-sm">選擇組別</p>
+        <div class="w-7/12 float-right">
+          <div class="w-full inline-flex shadow-md hover:shadow-lg focus:shadow-lg" role="group">
             <button
               type="button"
               class="w-[50%] rounded-l inline-block px-6 py-2.5 text-black font-medium text-xs leading-tight uppercase"
@@ -24,9 +19,7 @@
               :style="
                 userData.group == '學生組' ? groupBtnActive : groupBtnNormal
               "
-            >
-              學生組
-            </button>
+            >學生組</button>
             <button
               type="button"
               class="w-[50%] rounded-r inline-block px-6 py-2.5 text-black font-medium text-xs leading-tight uppercase"
@@ -35,23 +28,19 @@
               :style="
                 userData.group == '社會組' ? groupBtnActive : groupBtnNormal
               "
-            >
-              社會組
-            </button>
+            >社會組</button>
           </div>
         </div>
       </div>
 
       <div :class="teamFormNormalMode">
-        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
-          搜尋學校名稱
-        </p>
-        <div class="w-8/12 float-right flex flex-row">
+        <p class="text-black w-5/12 float-left text-xs mobile:text-sm">搜尋即時校際積分</p>
+        <div class="w-7/12 float-right flex flex-row">
           <input
             :disabled="userData.group != '學生組'"
             class="w-full h-full p-1"
             type="text"
-            id=""
+            id
             placeholder="輸入學校名稱"
             @input="filterName = $event.target.value"
           />
@@ -63,59 +52,48 @@
           :id="t.teamname == '社會組' ? 'social' : null"
           v-for="(t, index) in filterList"
           :key="t.teamname"
-          class=""
+          class
         >
           <div :class="isUserTeam(t) ? teamFocusClass : teamNormalClass">
             <div class="flex flex-row">
               <img
                 class="object-contain"
-                v-if="index == 0"
+                v-if="t.rank == 0"
                 src="~/assets/icons8-1st-place-medal-48.png"
                 width="24px"
                 height="24px"
               />
               <img
                 class="object-contain"
-                v-if="index == 1"
+                v-if="t.rank == 1"
                 src="~/assets/icons8-2nd-place-medal-48.png"
                 width="24px"
                 height="24px"
               />
               <img
                 class="object-contain"
-                v-if="index == 2"
+                v-if="t.rank == 2"
                 src="~/assets/icons8-3rd-place-medal-48.png"
                 width="24px"
                 height="24px"
               />
-              <div v-if="index > 2" style="width: 24px" />
-              <p class="pr-1 self-center text-white text-xs mobile:text-sm">
-                {{ "#" + (index + 1) }}
-              </p>
-              <p class="self-center text-white text-xs mobile:text-sm">
-                {{ t.teamname }}
-              </p>
+              <div v-if="t.rank > 2" style="width: 24px" />
+              <p class="pr-1 self-center text-white text-xs mobile:text-sm">{{ "#" + (t.rank + 1) }}</p>
+              <p class="self-center text-white text-xs mobile:text-sm">{{ t.teamname }}</p>
             </div>
             <div class="flex">
-              <p class="text-white self-center text-xs mobile:text-sm">
-                {{ t.score }}
-              </p>
+              <p class="text-white self-center text-xs mobile:text-sm">{{ t.score }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div
-        v-if="mode != 'result'"
-        class="flex space-x-2 justify-center mt-[5%]"
-      >
+      <div v-if="mode != 'result'" class="flex space-x-2 justify-center mt-[5%]">
         <button
           type="button"
           class="inline-block px-12 py-3 bg-gradient-to-b from-yellow-300 to-yellow-500 hover:from-yellow-200 hover:to-yellow-400 text-gray-600 font-black text-2xl uppercase shadow-md focus:ring-0 active:shadow-lg transition duration-150 ease-in-out border-2 border-yellow-200"
           @click="onProceed"
-        >
-          {{ proceedBtnLabel }}
-        </button>
+        >{{ proceedBtnLabel }}</button>
       </div>
     </div>
   </div>
@@ -242,8 +220,8 @@ export default {
     },
     scrollToUserTeam(selector) {
       this.$nextTick(() => {
-        console.log("try scroll");
-        console.log(this.mode);
+        // console.log("try scroll");
+        // console.log(this.mode);
         let el = document.querySelector(selector);
         if (el != null) {
           el.scrollIntoView({
@@ -270,6 +248,25 @@ export default {
       arr.sort(function (a, b) {
         return b.score - a.score;
       });
+
+      let rankShift = 0;
+      for (var i = 0; i < arr.length; i++) {
+        if (i > 0) {
+
+          if (arr[i].score == arr[i - 1].score) {
+            arr[i].rank = arr[i - 1].rank;
+            rankShift--;
+          }
+          else {
+            arr[i].rank = i + rankShift;
+          }
+        }
+        else {
+          //名次
+          arr[i].rank = i;
+        }
+      }
+
       this.teamList = arr;
       // console.log("current mode:" + this.mode);
       // console.log("current show:" + this.isShow);
@@ -281,7 +278,7 @@ export default {
       });
     },
   },
-  mounted() {},
+  mounted() { },
   computed: {
     filterList() {
       if (this.filterName.length > 0) {
@@ -339,10 +336,10 @@ export default {
       }
     },
     data: function (newVal, oldVal) {
-      console.log("on userdata update");
-      console.log(newVal);
+      // console.log("on userdata update");
+      // console.log(newVal);
       this.userData = newVal;
-      console.log(this.userData);
+      // console.log(this.userData);
     },
     team: function (newVal, oldVal) {
       this.buildTeamList(newVal);

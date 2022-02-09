@@ -3,9 +3,12 @@
     <div
       class="relative flex flex-col w-[75%] rounded-xl bg-[#262626] text-white"
     >
-      <p class="p-8 text-xl text-center" style="white-space: pre-line">
+    <div class="p-6 text-center text-xl">
+      <p :class="data.class" style="white-space: pre-line">
         {{ data == null ? "" : data.message.trim() }}
       </p>
+      </div>
+
       <button
         type="button"
         class="w-full h-[60px] bottom-0 bg-[#262626] border-t border-white/20 rounded-b-xl text-xl font-black text-yellow-400"

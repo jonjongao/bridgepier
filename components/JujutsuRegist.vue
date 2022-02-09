@@ -63,7 +63,7 @@
         class="relative w-[80%] ml-[10%] h-[50%] flex items-center mt-[5%]"
         v-if="userExistingRespond.hasUid == false"
       >
-        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">UID</p>
+        <p class="text-black w-4/12 float-left text-xs mobile:text-sm">UID *選填</p>
         <div class="w-8/12 float-right flex flex-row">
           <input
             class="w-full h-full p-1"
@@ -338,7 +338,7 @@ export default {
         await this.firebaseInstance
           .userExist(this.userData.emailaddress)
           .then(function (resp) {
-            console.log(resp);
+            // console.log(resp);
             result = resp;
             user = resp.data;
             isNewDay = resp.diffDays >= 1;
@@ -353,7 +353,7 @@ export default {
           };
           const remainPlaytime = this.userData.maxtime - this.userData.playtime;
 
-          console.log("go");
+          // console.log("go");
 
           // Has reset playtime
           if (isNewDay) {
@@ -379,7 +379,7 @@ export default {
           this.step = this.state.existUser;
         } else {
           this.step = this.state.newUser;
-          console.log(this.step);
+          // console.log(this.step);
           this.$nextTick(() => {
             this.$refs.emailField.setAttribute("disabled", true);
           });
@@ -443,7 +443,7 @@ export default {
           };
         }
 
-        console.log("Add user then submit team");
+        // console.log("Add user then submit team");
         await this.firebaseInstance.addUser(this.userData);
       } else {
       }
@@ -468,7 +468,7 @@ export default {
       }
 
       this.step = this.step.complete;
-      console.log(this.userData);
+      // console.log(this.userData);
       this.$emit("complete", this.userData);
     },
   },
@@ -491,7 +491,7 @@ export default {
     },
     show: function (newVal, oldVal) {
       this.isShow = newVal;
-      console.log("show update");
+      // console.log("show update");
       if (this.isShow == false) {
         this.step = 0;
         this.userData = {
