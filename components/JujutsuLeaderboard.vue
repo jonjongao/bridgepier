@@ -1,112 +1,41 @@
 <template>
-  <div v-if="isShow">
-    <div
-      v-if="mode != 'result'"
-      class="absolute w-full top-[calc(100%/12*3.7)] h-[calc(100%/12*1)] flex items-center justify-center"
-    >
-      <p class="text-black text-2xl font-black">{{ title }}</p>
+  <div>
+    <div v-if="isShow">
+      <LeaderboardDefault
+        :mode="mode"
+        :focus="focusTeam"
+        :filterList="filterList"
+        :title="title"
+        :proceedBtnLabel="proceedBtnLabel"
+        :teamListResultMode="teamListResultMode"
+        :teamListNormalMode="teamListNormalMode"
+        :teamContainerNormalMode="teamContainerNormalMode"
+        @proceed="onProceed"
+      />
     </div>
-    <div :class="teamContainerNormalMode">
-      <div :class="teamFormNormalMode">
-        <p class="text-black w-5/12 float-left text-xs mobile:text-sm">選擇組別</p>
-        <div class="w-7/12 float-right">
-          <div class="w-full inline-flex shadow-md hover:shadow-lg focus:shadow-lg" role="group">
-            <button
-              type="button"
-              class="w-[50%] rounded-l inline-block px-6 py-2.5 text-black font-medium text-xs leading-tight uppercase"
-              value="學生組"
-              @click="onClickStudentGroup"
-              :style="
-                userData.group == '學生組' ? groupBtnActive : groupBtnNormal
-              "
-            >學生組</button>
-            <button
-              type="button"
-              class="w-[50%] rounded-r inline-block px-6 py-2.5 text-black font-medium text-xs leading-tight uppercase"
-              value="社會組"
-              @click="onClickSocialGroup"
-              :style="
-                userData.group == '社會組' ? groupBtnActive : groupBtnNormal
-              "
-            >社會組</button>
-          </div>
-        </div>
-      </div>
-
-      <div :class="teamFormNormalMode">
-        <p class="text-black w-5/12 float-left text-xs mobile:text-sm">搜尋即時校際積分</p>
-        <div class="w-7/12 float-right flex flex-row">
-          <input
-            :disabled="userData.group != '學生組'"
-            class="w-full h-full p-1"
-            type="text"
-            id
-            placeholder="輸入學校名稱"
-            @input="filterName = $event.target.value"
-          />
-        </div>
-      </div>
-      <div :class="mode == 'result' ? teamListResultMode : teamListNormalMode">
-        <div
-          ref="team"
-          :id="t.teamname == '社會組' ? 'social' : null"
-          v-for="(t, index) in filterList"
-          :key="t.teamname"
-          class
-        >
-          <div :class="isUserTeam(t) ? teamFocusClass : teamNormalClass">
-            <div class="flex flex-row">
-              <img
-                class="object-contain"
-                v-if="t.rank == 0"
-                src="~/assets/icons8-1st-place-medal-48.png"
-                width="24px"
-                height="24px"
-              />
-              <img
-                class="object-contain"
-                v-if="t.rank == 1"
-                src="~/assets/icons8-2nd-place-medal-48.png"
-                width="24px"
-                height="24px"
-              />
-              <img
-                class="object-contain"
-                v-if="t.rank == 2"
-                src="~/assets/icons8-3rd-place-medal-48.png"
-                width="24px"
-                height="24px"
-              />
-              <div v-if="t.rank > 2" style="width: 24px" />
-              <p class="pr-1 self-center text-white text-xs mobile:text-sm">{{ "#" + (t.rank + 1) }}</p>
-              <p class="self-center text-white text-xs mobile:text-sm">{{ t.teamname }}</p>
-            </div>
-            <div class="flex">
-              <p class="text-white self-center text-xs mobile:text-sm">{{ t.score }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="mode != 'result'" class="flex space-x-2 justify-center mt-[5%]">
-        <button
-          type="button"
-          class="inline-block px-12 py-3 bg-gradient-to-b from-yellow-300 to-yellow-500 hover:from-yellow-200 hover:to-yellow-400 text-gray-600 font-black text-2xl uppercase shadow-md focus:ring-0 active:shadow-lg transition duration-150 ease-in-out border-2 border-yellow-200"
-          @click="onProceed"
-        >{{ proceedBtnLabel }}</button>
-      </div>
+    <div>
+      <LeaderboardOverall
+        :show="showOverall && step >= 0"
+        :mode="'overall'"
+        :userData="userData"
+        :teamList="teamList"
+        :title="title"
+        @proceed="onProceed"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import LeaderboardDefault from "./LeaderboardDefault.vue";
 export default {
   name: "JujutsuLeaderboard",
-  props: ["list", "show", "mode", "data", "team"],
+  props: ["list", "step", "show", "showOverall", "mode", "data", "team"],
   data() {
     return {
       isShow: false,
       title: "排行榜",
+      state: "",
       proceedBtnLabel: "開始遊戲",
       groupBtnActive: {
         backgroundColor: "darkorange",
@@ -154,7 +83,8 @@ export default {
         "w-[80%]": true,
         "ml-[10%]": true,
         "mt-[5%]": true,
-        "h-[400%]": true,
+        // "h-[400%]": true,
+        "h-[550%]": true,
         "overflow-auto": true,
         "px-3": true,
         "py-2": true,
@@ -166,7 +96,7 @@ export default {
         "w-[80%]": true,
         "ml-[10%]": true,
         "mt-[3%]": true,
-        "h-[350%]": true,
+        "h-[430%]": true,
         "overflow-auto": true,
         "px-3": true,
         "py-2": true,
@@ -175,7 +105,7 @@ export default {
         absolute: true,
         "w-full": true,
         "top-[calc(100%/12*4.5)]": true,
-        "top-[calc(100%/12*5.5)]": false,
+        "top-[calc(100%/12*6.3)]": false,
         "h-[calc(100%/12*1)]": true,
       },
       teamFormNormalMode: {
@@ -189,6 +119,7 @@ export default {
         "mt-[3%]": false,
       },
       filterName: "",
+      focusTeam: "",
     };
   },
   methods: {
@@ -199,25 +130,22 @@ export default {
     isUserTeam(teamValue) {
       if (teamValue.teamname == "社會組" && this.userData.group == "社會組")
         return true;
-      return (
-        teamValue.teamname ==
-        this.userData.entity.city + this.userData.entity.school
-      );
+      return (teamValue.teamname ==
+        this.userData.entity.city + this.userData.entity.school);
     },
-    onClickStudentGroup(e) {
-      this.userData.group = e.target.value;
-
-      if (this.mode == "anony") this.filterName = "";
-      else if (this.mode == "focus") {
-        this.filterName = "";
-        this.scrollToUserTeam(".focus-team");
-      }
-    },
-    onClickSocialGroup(e) {
-      this.userData.group = e.target.value;
-
-      this.scrollToUserTeam("#social");
-    },
+    // onClickStudentGroup(e) {
+    //   this.userData.group = e.target.value;
+    //   if (this.mode == "anony")
+    //     this.filterName = "";
+    //   else if (this.mode == "focus") {
+    //     this.filterName = "";
+    //     this.scrollToUserTeam(".focus-team");
+    //   }
+    // },
+    // onClickSocialGroup(e) {
+    //   this.userData.group = e.target.value;
+    //   this.scrollToUserTeam("#social");
+    // },
     scrollToUserTeam(selector) {
       this.$nextTick(() => {
         // console.log("try scroll");
@@ -248,11 +176,13 @@ export default {
       arr.sort(function (a, b) {
         return b.score - a.score;
       });
-
+      // if (this.mode == 'anony') {
+      //   //匿名模式(主選單)限制20個單位
+      //   arr.length = 20;
+      // }
       let rankShift = 0;
       for (var i = 0; i < arr.length; i++) {
         if (i > 0) {
-
           if (arr[i].score == arr[i - 1].score) {
             arr[i].rank = arr[i - 1].rank;
             rankShift--;
@@ -266,31 +196,84 @@ export default {
           arr[i].rank = i;
         }
       }
-
       this.teamList = arr;
       // console.log("current mode:" + this.mode);
       // console.log("current show:" + this.isShow);
-
+      console.log("build teamlist");
       this.$nextTick(() => {
         if (this.mode != "anony") {
           this.scrollToUserTeam(".focus-team");
         }
       });
     },
+    indexOfUserTeam(arr) {
+      for (var i = 0; i < arr.length; i++) {
+        if (this.isUserTeam(arr[i]))
+          return i;
+      }
+      return -1;
+    },
   },
-  mounted() { },
+  mounted() {
+    console.log("mode=" + this.mode + " show=" + this.show);
+    if (this.mode == "overall")
+      this.isShow = true;
+    this.state = "hide";
+  },
   computed: {
     filterList() {
+      let beginArr = this.teamList.concat();
+      let idx = this.indexOfUserTeam(this.teamList);
+
+      if (idx >= 0) {
+        //beginArr[idx]["isUserTeam"] = true;
+        this.focusTeam = this.userData.group == '社會組' ? '社會組' : beginArr[idx].teamname;
+      }
+      else
+        this.focusTeam = '';
+
+      //第一層運算, 根據模式組成隊伍陣列
+      switch (this.mode) {
+        case "anony":
+          beginArr = this.teamList.slice(0, 20);
+          break;
+        case "focus":
+        case "result":
+          console.log("show in focus");
+          // let idx = this.indexOfUserTeam(this.teamList);
+          let min = Math.max(0, idx - 3);
+          let med1 = Math.min(idx, this.teamList.length);
+          let med2 = Math.max(0, idx);
+          let max = Math.min(idx + 4, this.teamList.length);
+          let arr1 = this.teamList.slice(min, med1);
+          let arr2 = this.teamList.slice(med2, max);
+          if(arr1.length>3 || arr2.length>4)
+          {
+            console.log("incorrect array size, early break");
+            break;
+          }
+          beginArr = arr1.concat(arr2);
+          // console.log(arr1);
+          // console.log(arr2);
+          break;
+      }
+      //利用第一層的陣列做搜尋欄的篩選
       if (this.filterName.length > 0) {
         let arr = [];
-        for (var k in this.teamList) {
-          if (this.teamList[k].teamname.includes(this.filterName))
-            arr.push(this.teamList[k]);
+        for (var k in beginArr.length) {
+          if (beginArr[k].teamname.includes(this.filterName))
+            arr.push(beginArr[k]);
         }
         return arr;
-      } else {
-        return this.teamList;
       }
+      else {
+        return beginArr;
+      }
+    },
+    modeState() {
+      if (this.state == "")
+        return this.mode;
+      return this.mode + "-" + this.state;
     },
   },
   watch: {
@@ -298,6 +281,7 @@ export default {
       this.isShow = newVal;
     },
     mode: function (newVal, oldVal) {
+      console.log("mode:" + newVal);
       if (newVal == "anony") {
         this.filterName = "";
         this.userData = {
@@ -311,26 +295,26 @@ export default {
           },
         };
       }
-
+      //有anony, focus, 還會追加overall
       switch (newVal) {
         case "anony":
-          this.title = "排行榜";
-          this.proceedBtnLabel = "參加比賽";
+          this.title = "即時校際積分排行";
+          this.proceedBtnLabel = "開始遊戲";
           break;
         default:
-          this.title = "排行榜";
+          this.title = "目前積分排行";
           this.proceedBtnLabel = "繼續";
           break;
       }
-
       if (newVal == "result") {
         this.teamContainerNormalMode["top-[calc(100%/12*4.5)]"] = false;
-        this.teamContainerNormalMode["top-[calc(100%/12*5.5)]"] = true;
+        this.teamContainerNormalMode["top-[calc(100%/12*6.3)]"] = true;
         this.teamFormNormalMode["mt-[5%]"] = false;
         this.teamFormNormalMode["mt-[3%]"] = true;
-      } else {
+      }
+      else {
         this.teamContainerNormalMode["top-[calc(100%/12*4.5)]"] = true;
-        this.teamContainerNormalMode["top-[calc(100%/12*5.5)]"] = false;
+        this.teamContainerNormalMode["top-[calc(100%/12*6.3)]"] = false;
         this.teamFormNormalMode["mt-[5%]"] = true;
         this.teamFormNormalMode["mt-[3%]"] = false;
       }
@@ -345,5 +329,6 @@ export default {
       this.buildTeamList(newVal);
     },
   },
+  components: { LeaderboardDefault }
 };
 </script>

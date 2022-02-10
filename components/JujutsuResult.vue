@@ -1,8 +1,8 @@
 <template>
   <div v-if="isShow">
-    <div class="absolute w-full top-[0%] h-[calc(100%/12*1)]">
+    <div class="absolute w-full top-[0%] h-[calc(100%/12*1)] pointer-events-none">
       <button
-        class="relative w-[35%] h-[100%] ml-[65%]"
+        class="relative w-[20%] h-[100%] ml-[80%] pointer-events-auto z-10"
         type="button"
         @click="onClickReturn"
       ></button>

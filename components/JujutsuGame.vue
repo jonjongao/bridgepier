@@ -7,7 +7,7 @@
       <div
         class="relative w-[65%] ml-[18%] h-[100%] flex items-center justify-center"
       >
-        <p class="w-[55%] text-white text-center select-none text-2xl mobile:text-3xl">分數</p>
+        <p class="w-[55%] text-white text-center select-none text-2xl mobile:text-3xl">擊殺數</p>
         <p class="w-[45%] text-white text-center select-none text-2xl mobile:text-3xl"></p>
         <!-- <p class="w-[45%] text-white text-center select-none text-2xl mobile:text-3xl">{{ gameUpdate.score }}</p> -->
       </div>

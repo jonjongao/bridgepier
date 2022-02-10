@@ -119,12 +119,18 @@ export default {
 
       await set(ref(db, "users/" + id), data);
 
-      this.$post2parent.message({key:'new-user',value:id})
+      this.$post2parent.message({ key: 'new-user', value: id })
     },
     async submitTeam(data) {
       const userID = this.getUserID(data.emailaddress);
-      const id = this.getTeamID(data);
-      const teamname = this.getTeamName(data);
+      let id = this.getTeamID(data);
+      if (id === '--社會組')
+        id = '社會組';
+
+      let teamname = this.getTeamName(data);
+      if (teamname === null || teamname === 'undefined')
+        teamname = '社會組';
+
       const dbRef = ref(getDatabase());
       const db = getDatabase();
       const snapshot = await get(child(dbRef, "teams/" + id));
@@ -138,7 +144,7 @@ export default {
           },
         });
 
-        this.$post2parent.message({key:'new-team',value:id})
+        this.$post2parent.message({ key: 'new-team', value: id })
 
         onValue(ref(db, "teams/" + id), (snapshot) => {
           const data = snapshot.val();
@@ -295,10 +301,10 @@ export default {
       return userData.group == "社會組"
         ? "社會組"
         : userData.entity.city +
-            "-" +
-            userData.entity.zone +
-            "-" +
-            userData.entity.school;
+        "-" +
+        userData.entity.zone +
+        "-" +
+        userData.entity.school;
     },
     getTeamName(userData) {
       return userData.group == "社會組"

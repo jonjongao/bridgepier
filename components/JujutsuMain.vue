@@ -5,12 +5,7 @@
     :style="{ height: respHeight + 'px' }"
     ref="unityContainer"
   >
-    <canvas
-      id="unity-canvas"
-      :width="respWidth + 'px'"
-      :height="respHeight + 'px'"
-      class="w-full"
-    ></canvas>
+    <canvas id="unity-canvas" :width="respWidth + 'px'" :height="respHeight + 'px'" class="w-full"></canvas>
     <div id="unity-loading-bar">
       <div id="unity-logo"></div>
       <div id="unity-progress-bar-empty">
@@ -19,20 +14,23 @@
     </div>
 
     <!-- <Checker /> -->
-    <div class="absolute w-full h-full top-0" v-if="step!=state.gameplay"/>
-    <Firebase
-      ref="firebase"
-      @team-update="onTeamUpdate"
-      @team-update-unit="onTeamUpdateInUnit"
-    />
-    <JujutsuLeaderboard
-      ref="leaderboard"
-      :show="canShowLeaderboard"
+    <div class="absolute w-full h-full top-0" v-if="step != state.gameplay" />
+    <Firebase ref="firebase" @team-update="onTeamUpdate" @team-update-unit="onTeamUpdateInUnit" />
+    <!-- <JujutsuLeaderboard
+      
+      :show="canShowOverallLeaderboard"
       :team="teamData"
-      :mode="leaderboardMode"
+      :mode="'overall'"
       :data="userData"
-      @complete="onLeaderboardComplete"
+      @complete=""
+    /> -->
+    <JujutsuResult
+      :show="step == state.result"
+      @click-return="onClickReturn"
+      @click-download="onClickDownloadApp"
+      @click-share="onClickFacebookShare"
     />
+   
     <JujutsuRegist
       :show="step == state.regist"
       :firebase="firebaseInstance"
@@ -45,11 +43,15 @@
       :game="gameResultData"
       :gameUpdate="gameUpdateData"
     />
-    <JujutsuResult
-      :show="step == state.result"
-      @click-return="onClickReturn"
-      @click-download="onClickDownloadApp"
-      @click-share="onClickFacebookShare"
+     <JujutsuLeaderboard
+      ref="leaderboard"
+      :step="step"
+      :show="canShowLeaderboard"
+      :showOverall="canShowOverallLeaderboard"
+      :team="teamData"
+      :mode="leaderboardMode"
+      :data="userData"
+      @complete="onLeaderboardComplete"
     />
 
     <Modal :data="modalData" @modal-confirm="onModalConfirm" />
@@ -99,7 +101,7 @@ export default {
       },
       shareUrl: "https://pubgm-2022-firstquarter-event.com.tw",
       downloadUrl: "https://pubgm.tw/tigeryear",
-      leaderboardMode: "anony",
+      leaderboardMode: "",
     };
   },
   beforeMount() {
@@ -164,7 +166,7 @@ export default {
         }
       });
 
-      this.$post2parent.message({key:'game-initialized',value:200});
+      this.$post2parent.message({ key: 'game-initialized', value: 200 });
       // this.setStep(this.state.titleLeaderboard);
     });
 
@@ -215,7 +217,7 @@ export default {
         this.respHeight + "px";
     },
     setStep(state) {
-      // console.log("set state to:" + state);
+      console.log("set state to:" + state);
       switch (state) {
         case this.state.none:
           break;
@@ -228,22 +230,22 @@ export default {
             score: 0,
           };
           // console.log("set anony");
-          this.$post2parent.message({key:'on-mainmenu',value:200});
+          this.$post2parent.message({ key: 'on-mainmenu', value: 200 });
           break;
         case this.state.regist:
-          this.$post2parent.message({key:'on-registering',value:200})
+          this.$post2parent.message({ key: 'on-registering', value: 200 })
           break;
         case this.state.userLeaderboard:
           this.leaderboardMode = "focus";
           // console.log("set focus");
           break;
         case this.state.gameplay:
-          this.$post2parent.message({key:'on-startplay',value:200})
+          this.$post2parent.message({ key: 'on-startplay', value: 200 })
           break;
         case this.state.result:
           this.leaderboardMode = "result";
           // console.log("set result");
-          this.$post2parent.message({key:'on-result',value:200})
+          this.$post2parent.message({ key: 'on-result', value: 200 })
           break;
       }
       this.step = state;
@@ -264,13 +266,13 @@ export default {
       this.setStep(this.state.gameplay);
 
       this.modalData = {
-          show: true,
-          message: "點擊宿儺手指\n提升三級盔先生武器\n下方量條集滿後\n攻擊武器會升等\n同時增加攻擊傷害\n挑戰限時內擊敗更多敵人\n提升校際積分！\n\n點擊確認後立即開始遊戲",
-          class: "text-base",
-          callback: ()=>{
-            this.unityInstance.SendMessage("Main Camera", "WaitAndStart");
-          },
-        };
+        show: true,
+        message: "點擊宿儺手指\n提升三級盔先生武器\n下方能量條集滿後\n攻擊武器會升等\n同時增加攻擊傷害\n挑戰限時內擊敗更多敵人\n提升校際積分！\n\n點擊確認後立即開始遊戲",
+        class: "text-base",
+        callback: () => {
+          this.unityInstance.SendMessage("Main Camera", "WaitAndStart");
+        },
+      };
 
       if (this.unityInstance != null) {
         if (this.userData.gameuid == "") {
@@ -304,6 +306,7 @@ export default {
       else {
         if (this.teamData == null) this.teamData = {};
         this.teamData[team.key] = team.data;
+        console.log("ref new team");
         // console.log("regist " + team.key + " with data " + team.data.score);
         this.$refs.leaderboard.buildTeamList(this.teamData);
       }
@@ -324,11 +327,11 @@ export default {
     onClickReturn(e) {
       if (this.unityInstance != null)
         this.unityInstance.SendMessage("Main Camera", "Return");
-      this.$post2parent.message({key:'click-return',value:200})
+      this.$post2parent.message({ key: 'click-return', value: 200 })
     },
     onClickDownloadApp(e) {
       window.open("https://pubgm.tw/tigeryear");
-      this.$post2parent.message({key:'download-app',value:200})
+      this.$post2parent.message({ key: 'download-app', value: 200 })
     },
     onClickFacebookShare(e) {
       FB.ui(
@@ -337,9 +340,9 @@ export default {
           hashtag: "#絕地盃宿儺手指校際賽",
           href: "https://pubgm-2022-firstquarter-event.com.tw/",
         },
-        function (response) {}
+        function (response) { }
       );
-      this.$post2parent.message({key:'fb-share',value:200})
+      this.$post2parent.message({ key: 'fb-share', value: 200 })
 
       if (this.userData.maxtime == 6) {
         // console.log("already boost maxplaytime");
@@ -350,7 +353,7 @@ export default {
       } else {
         this.firebaseInstance.addBonusMaxPlaytime(this.userData);
         this.userData.maxtime = 6;
-        this.$post2parent.message({key:'on-bonus-playtime',value:200})
+        this.$post2parent.message({ key: 'on-bonus-playtime', value: 200 })
         this.modalData = {
           show: true,
           message: "獲得增益: 遊玩上限+3！",
@@ -403,6 +406,11 @@ export default {
       )
         return true;
       else return false;
+    },
+    canShowOverallLeaderboard() {
+      if (this.step == this.state.gameplay)
+        return false;
+      return true;
     },
   },
 };

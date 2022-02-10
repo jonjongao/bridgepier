@@ -15,19 +15,30 @@
         <p class="text-black w-4/12 float-left text-xs mobile:text-sm">
           電子郵件
         </p>
-        <div class="w-8/12 float-right">
+        <div class="w-8/12 float-right flex flex-row">
           <input
-            class="w-full h-full p-1"
+            class="w-10/12 h-full p-1"
             type="text"
             id=""
             placeholder="輸入電子郵件"
             @input="inputEmail = $event.target.value"
+            @keydown.enter="emailVerifyProceed"
           />
+          <button
+          type="button"
+          class="ml-1 w-2/12 text-center rounded flex items-center justify-center border-2 border-yellow-200"
+          style="backgroundColor: orange"
+          @click="emailVerifyProceed"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+</svg>
+        </button>
           <!-- <span class="w-full text-xs text-red-600" id="passwordHelp">電子郵件格式錯誤</span>   -->
         </div>
       </div>
 
-      <div class="flex space-x-2 justify-center mt-[10%]">
+      <!-- <div class="flex space-x-2 justify-center mt-[10%]">
         <button
           type="button"
           class="inline-block px-12 py-3 bg-gradient-to-b from-yellow-300 to-yellow-500 hover:from-yellow-200 hover:to-yellow-400 text-gray-600 font-black text-2xl uppercase shadow-md focus:ring-0 active:shadow-lg transition duration-150 ease-in-out border-2 border-yellow-200"
@@ -35,7 +46,7 @@
         >
           繼續
         </button>
-      </div>
+      </div> -->
     </div>
 
     <div
