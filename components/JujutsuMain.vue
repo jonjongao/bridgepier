@@ -72,6 +72,7 @@ export default {
         message: "",
         class: "",
         callback: null,
+        confirm: "確定"
       },
       unityInstance: null,
       firebaseInstance: null,
@@ -200,6 +201,7 @@ export default {
         show: false,
         message: "",
         callback: null,
+        confirm: "確定",
       };
     },
     onResize() {
@@ -267,8 +269,9 @@ export default {
 
       this.modalData = {
         show: true,
-        message: "點擊宿儺手指\n提升三級盔先生武器\n下方能量條集滿後\n攻擊武器會升等\n同時增加攻擊傷害\n挑戰限時內擊敗更多敵人\n提升校際積分！\n\n點擊確認後立即開始遊戲",
-        class: "text-base",
+        message: "點擊宿儺手指\n提升三級盔先生武器\n下方能量條集滿後\n攻擊武器會升等\n同時增加攻擊傷害\n挑戰限時內擊敗更多敵人\n提升校際積分！\n\n點擊開始後將立即開始遊戲",
+        class: "text-sm mobile:text-base",
+        confirm: "開始！",
         callback: () => {
           this.unityInstance.SendMessage("Main Camera", "WaitAndStart");
         },

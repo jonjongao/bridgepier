@@ -1,21 +1,18 @@
 <template>
   <div :class="modalClass">
-    <div
-      class="relative flex flex-col w-[75%] rounded-xl bg-[#262626] text-white"
-    >
-    <div class="p-6 text-center text-xl">
-      <p :class="data.class" style="white-space: pre-line">
-        {{ data == null ? "" : data.message.trim() }}
-      </p>
+    <div class="relative flex flex-col w-[75%] rounded-xl bg-[#262626] text-white">
+      <div class="p-6 text-center text-xl">
+        <p
+          :class="data.class"
+          style="white-space: pre-line"
+        >{{ data == null ? "" : data.message.trim() }}</p>
       </div>
 
       <button
         type="button"
         class="w-full h-[60px] bottom-0 bg-[#262626] border-t border-white/20 rounded-b-xl text-xl font-black text-yellow-400"
         @click="onClickConfirm"
-      >
-        確定
-      </button>
+      >{{ data.confirm == null ? "確定" : data.confirm }}</button>
     </div>
   </div>
 </template>
