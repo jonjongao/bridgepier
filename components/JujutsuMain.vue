@@ -219,7 +219,7 @@ export default {
         this.respHeight + "px";
     },
     setStep(state) {
-      console.log("set state to:" + state);
+      // console.log("set state to:" + state);
       switch (state) {
         case this.state.none:
           break;
@@ -309,7 +309,7 @@ export default {
       else {
         if (this.teamData == null) this.teamData = {};
         this.teamData[team.key] = team.data;
-        console.log("ref new team");
+        // console.log("ref new team");
         // console.log("regist " + team.key + " with data " + team.data.score);
         this.$refs.leaderboard.buildTeamList(this.teamData);
       }
@@ -323,7 +323,7 @@ export default {
           this.onUserLeaderboardComplete();
           break;
         case this.state.result:
-          console.log("on result leaderboard complete");
+          // console.log("on result leaderboard complete");
           break;
       }
     },

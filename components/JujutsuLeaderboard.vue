@@ -152,11 +152,11 @@ export default {
         // console.log(this.mode);
         let el = document.querySelector(selector);
         if (el != null) {
-          el.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "nearest",
-          });
+          // el.scrollIntoView({
+          //   behavior: "smooth",
+          //   block: "center",
+          //   inline: "nearest",
+          // });
         }
       });
     },
@@ -199,7 +199,7 @@ export default {
       this.teamList = arr;
       // console.log("current mode:" + this.mode);
       // console.log("current show:" + this.isShow);
-      console.log("build teamlist");
+      // console.log("build teamlist");
       this.$nextTick(() => {
         if (this.mode != "anony") {
           this.scrollToUserTeam(".focus-team");
@@ -215,7 +215,7 @@ export default {
     },
   },
   mounted() {
-    console.log("mode=" + this.mode + " show=" + this.show);
+    // console.log("mode=" + this.mode + " show=" + this.show);
     if (this.mode == "overall")
       this.isShow = true;
     this.state = "hide";
@@ -239,7 +239,7 @@ export default {
           break;
         case "focus":
         case "result":
-          console.log("show in focus");
+          // console.log("show in focus");
           // let idx = this.indexOfUserTeam(this.teamList);
           let min = Math.max(0, idx - 3);
           let med1 = Math.min(idx, this.teamList.length);

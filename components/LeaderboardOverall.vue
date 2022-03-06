@@ -218,14 +218,14 @@ export default {
     },
     watch: {
         show: function (newVal, oldVal) {
-            console.log("overall update show:" + newVal);
+            // console.log("overall update show:" + newVal);
         },
     },
     mounted() {
-        console.log("overall mounted");
+        // console.log("overall mounted");
     },
     unmounted() {
-        console.log("overall unmounted");
+        // console.log("overall unmounted");
     },
     computed: {
         filterList() {
@@ -259,7 +259,7 @@ export default {
 
             if (this.filterName.length > 0) {
                 let arr = [];
-                console.log(beginArr);
+                // console.log(beginArr);
                 for (var k in beginArr) {
                     if (beginArr[k].teamname == 'undefined') continue;
                     if (beginArr[k].teamname == null) continue;

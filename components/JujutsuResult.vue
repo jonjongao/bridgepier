@@ -53,7 +53,7 @@ export default {
   watch: {
     show: function (newVal, oldVal) {
       this.isShow = newVal;
-      console.log("show update");
+      // console.log("show update");
     },
   },
 };
