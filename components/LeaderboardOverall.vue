@@ -45,7 +45,7 @@
                         />
                     </div>
                 </div>
-                <div :class="mode == 'result' ? teamListResultMode : teamListNormalMode">
+                <div id="teamOverflow" :class="mode == 'result' ? teamListResultMode : teamListNormalMode">
                     <div
                         ref="team"
                         :id="t.teamname == '社會組' ? 'social' : null"
@@ -310,11 +310,20 @@ export default {
                 // console.log("try scroll");
                 // console.log(this.mode);
                 let el = document.querySelector(selector);
+                let ctn = document.querySelector('#teamOverflow');
+                // console.log(el.scrollHeight);
+                // console.log(ctn);
+                
                 if (el != null) {
-                    el.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                        inline: "nearest",
+                    // ctn.scrollTop = el.scrollHeight+80;
+                    // el.scrollIntoView({
+                    //     behavior: "smooth",
+                    //     block: "center",
+                    //     inline: "nearest",
+                    // });
+                    ctn.scrollTo({
+                        top: el.scrollHeight-el.offsetHeight,
+                        behavior: 'smooth'
                     });
                 }
             });

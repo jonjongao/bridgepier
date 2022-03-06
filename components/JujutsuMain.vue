@@ -341,7 +341,7 @@ export default {
         {
           method: "share",
           hashtag: "#絕地盃宿儺手指校際賽",
-          href: "https://pubgm-2022-firstquarter-event.com.tw/",
+          href: "https://pubgm-2022-firstquarter-event.com.tw/sukunafinger1/",
         },
         function (response) { }
       );
