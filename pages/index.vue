@@ -1,5 +1,5 @@
 <template>
-  <JujutsuMain/>
+  <JujutsuMainStatic/>
 </template>
 
 <script>

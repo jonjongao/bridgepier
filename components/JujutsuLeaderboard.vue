@@ -124,8 +124,8 @@ export default {
   },
   methods: {
     onProceed(e) {
-      this.$emit("complete", this.userData);
-      this.filterName = "";
+      // this.$emit("complete", this.userData);
+      // this.filterName = "";
     },
     isUserTeam(teamValue) {
       if (teamValue.teamname == "社會組" && this.userData.group == "社會組")
@@ -299,7 +299,7 @@ export default {
       switch (newVal) {
         case "anony":
           this.title = "即時校際積分排行";
-          this.proceedBtnLabel = "開始遊戲";
+          this.proceedBtnLabel = "活動結束";
           break;
         default:
           this.title = "目前積分排行";

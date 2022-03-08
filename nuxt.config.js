@@ -15,11 +15,10 @@ export default {
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
-      { rel: 'stylesheet', href: 'webgl/TemplateData/style.css' }
+      
     ],
     script: [
-      { src: 'webgl/Build/webgl.loader.js', body: true },
-      { src: 'webgl/TemplateData/player.js', body:true},
+      
     ]
   },
 
